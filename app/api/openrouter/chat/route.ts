@@ -4,38 +4,35 @@ export const runtime = 'edge';
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
     const userApiKey = req.headers.get('x-api-key');
-    const apiKey = userApiKey || process.env.OPENROUTER_FREE_API_KEY;
-
-    if (!apiKey) {
-      return NextResponse.json({ error: 'No API key available' }, { status: 401 });
+    if (!userApiKey) {
+      return NextResponse.json(
+        { error: 'OpenRouter API key wajib diisi. Masukkan key kamu di settings.' },
+        { status: 401 }
+      );
     }
 
+    const body = await req.json();
     const { messages, model, stream = true } = body;
 
-    const openrouterRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${userApiKey}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://njirlah.ai',
         'X-Title': 'NJIRLAH AI',
       },
-      body: JSON.stringify({
-        model: model || 'meta-llama/llama-3.1-8b-instruct:free',
-        messages,
-        stream,
-      }),
+      body: JSON.stringify({ model: model || 'meta-llama/llama-3.1-8b-instruct:free', messages, stream }),
     });
 
-    if (!openrouterRes.ok) {
-      const err = await openrouterRes.text();
-      return NextResponse.json({ error: err }, { status: openrouterRes.status });
+    if (!res.ok) {
+      const err = await res.text();
+      return NextResponse.json({ error: err }, { status: res.status });
     }
 
     if (stream) {
-      return new Response(openrouterRes.body, {
+      return new Response(res.body, {
         headers: {
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache',
@@ -44,8 +41,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const data = await openrouterRes.json();
-    return NextResponse.json(data);
+    return NextResponse.json(await res.json());
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
