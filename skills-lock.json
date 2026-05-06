@@ -1,0 +1,155 @@
+{
+  "version": 1,
+  "skills": {
+    "agent-md-refactor": {
+      "source": "softaworks/agent-toolkit",
+      "sourceType": "github",
+      "skillPath": "skills/agent-md-refactor/SKILL.md",
+      "computedHash": "51c53259bba830ebad6741b2ab69d213d5a4d02835f7f27925a0e4e93515fc22"
+    },
+    "agent-tools": {
+      "source": "inf-sh/skills",
+      "sourceType": "github",
+      "skillPath": "tools/agent-tools/SKILL.md",
+      "computedHash": "3e8e1e6d9b56fa1126e09c589b171e786efee01c806623f7cb41dfde724b0274"
+    },
+    "audit-website": {
+      "source": "squirrelscan/skills",
+      "sourceType": "github",
+      "skillPath": "audit-website/SKILL.md",
+      "computedHash": "2c060290f90340e8bb6009502ec936b8ebb3ff889332a43e24bf210528ebba9f"
+    },
+    "clawdirect": {
+      "source": "napoleond/clawdirect",
+      "sourceType": "github",
+      "skillPath": "skills/clawdirect/SKILL.md",
+      "computedHash": "ff5a80b5b6cc010eef2aececed78050e5f0d8d85d8b7ed166af11f15af51ef0c"
+    },
+    "clawdirect-dev": {
+      "source": "napoleond/clawdirect",
+      "sourceType": "github",
+      "skillPath": "skills/clawdirect-dev/SKILL.md",
+      "computedHash": "aba0b53a6fffb1e0bc53dcda81dd74146ccf65fed54fb9f33c208cdd710f62a2"
+    },
+    "command-creator": {
+      "source": "softaworks/agent-toolkit",
+      "sourceType": "github",
+      "skillPath": "skills/command-creator/SKILL.md",
+      "computedHash": "b58ae6c69fa86fe48c4745db460fc190c7661ab0371d1e719d7272a36630880c"
+    },
+    "dispatching-parallel-agents": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "skillPath": "skills/dispatching-parallel-agents/SKILL.md",
+      "computedHash": "e21044ae7496fc285f1df9ff3fb518a3a20bea6f5216c1f59f4987e12c769a0a"
+    },
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "computedHash": "9e1c8b3103f92fa8092568a44fe64858de7c5c9dc65ce4bea8f168080e889cfd"
+    },
+    "firecrawl": {
+      "source": "firecrawl/cli",
+      "sourceType": "github",
+      "skillPath": "skills/firecrawl-cli/SKILL.md",
+      "computedHash": "43cfdfe9d4a27815698e36e4b7c4f96cbc69cd4b9af5d056f1f489d51206e3b1"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "063a0e6448123cd359ad0044cc46b0e490cc7964d45ef4bb9fd842bd2ffbca67"
+    },
+    "instaclaw": {
+      "source": "napoleond/instaclaw",
+      "sourceType": "github",
+      "skillPath": "skill/SKILL.md",
+      "computedHash": "1c97dc872af5dc556111e63764c0052fd7076418035f83825f7932c2c0e39bd3"
+    },
+    "javascript-sdk": {
+      "source": "inf-sh/skills",
+      "sourceType": "github",
+      "skillPath": "sdk/javascript-sdk/SKILL.md",
+      "computedHash": "bced67b0784e8a9574e5346153b6777bccadbb6f7075fea47234cab56ab383bf"
+    },
+    "langchain-architecture": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/llm-application-dev/skills/langchain-architecture/SKILL.md",
+      "computedHash": "8bcb9750c6e564da50f8a6b4e8a9b60030a48a1323e5dee64c37469d3192c683"
+    },
+    "llm-evaluation": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/llm-application-dev/skills/llm-evaluation/SKILL.md",
+      "computedHash": "e6ecef1dfafd90f7aed14b1ef54c4ced5c84183416e36b03bcb657e3fe8f5098"
+    },
+    "mastra": {
+      "source": "mastra-ai/skills",
+      "sourceType": "github",
+      "skillPath": "skills/mastra/SKILL.md",
+      "computedHash": "b42f583342dfee7deb541f4d094f03e8748898257f1f884fa71de1fdba9f38a2"
+    },
+    "mcp-builder": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/mcp-builder/SKILL.md",
+      "computedHash": "826e46adf81e1372282e205c34e1a2ee876e72148007726e4a2512599d2fef7b"
+    },
+    "plugin-forge": {
+      "source": "softaworks/agent-toolkit",
+      "sourceType": "github",
+      "skillPath": "skills/plugin-forge/SKILL.md",
+      "computedHash": "39a07b89f1ca72fda7bf38aff702b20e4503be7ebe0ba6ac5b2d1eee77d4d3e0"
+    },
+    "prompt-engineering-patterns": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/llm-application-dev/skills/prompt-engineering-patterns/SKILL.md",
+      "computedHash": "4a8810c06525c95fd9370fdb3311d969fc89a53a196fe500b5b4f8529b21c9a7"
+    },
+    "rag-implementation": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/llm-application-dev/skills/rag-implementation/SKILL.md",
+      "computedHash": "fcf8874b44501e34362a3c31e231f922f3ea1376c8afaf92e8550f88287e1ca2"
+    },
+    "session-handoff": {
+      "source": "softaworks/agent-toolkit",
+      "sourceType": "github",
+      "skillPath": "skills/session-handoff/SKILL.md",
+      "computedHash": "8a73adac79d965a57dc5e898a498c479b749a8fad5ba03b08aa033ad9b710437"
+    },
+    "skill-judge": {
+      "source": "softaworks/agent-toolkit",
+      "sourceType": "github",
+      "skillPath": "skills/skill-judge/SKILL.md",
+      "computedHash": "ff132ba281d460d3cf7814601e304f24e795a606a8e20e78f1bd103258bc735c"
+    },
+    "stitch-loop": {
+      "source": "google-labs-code/stitch-skills",
+      "sourceType": "github",
+      "skillPath": "skills/stitch-loop/SKILL.md",
+      "computedHash": "e04912a9719b855afa733cc928d30dde0b8a5b91707ca27b98f0efcb8d9310a9"
+    },
+    "subagent-driven-development": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "skillPath": "skills/subagent-driven-development/SKILL.md",
+      "computedHash": "b38be2f3a092d758127f6d47e77c2493885aebf38aae359e4c786df2c343b837"
+    },
+    "superdesign": {
+      "source": "superdesigndev/superdesign-skill",
+      "sourceType": "github",
+      "skillPath": "skills/superdesign/SKILL.md",
+      "computedHash": "7208b5e2e1145d76abcd698b2a9085952d986022ec2d5d8b9f972106b1b2447b"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-design-guidelines/SKILL.md",
+      "computedHash": "f3bc47f890f42a44db1007ab390709ec368e4b8c089baee6b0007182236ac474"
+    }
+  }
+}

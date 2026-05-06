@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
@@ -13,6 +13,7 @@ import ProgressBar from '@/components/ui/ProgressBar';
 import ToastStack from '@/components/ui/ToastStack';
 import { useChatStore } from '@/store/chat-store';
 import { useApiKeyStore } from '@/store/api-key-store';
+import { useState } from 'react';
 
 const UnicornBackground = dynamic(() => import('@/components/layout/UnicornBackground'), { ssr: false });
 const CustomCursor = dynamic(() => import('@/components/ui/CustomCursor'), { ssr: false });
@@ -26,16 +27,13 @@ export default function HomePage() {
     chats, activeChatId, createChat, addMessage,
     isStreaming, streamingContent, setIsStreaming, setStreamingContent,
     selectedModel, selectedProvider, getActiveChat, _hasHydrated,
+    temperature, setTemperature,
   } = useChatStore();
 
   const { openrouterKey, loadKey } = useApiKeyStore();
 
-  // Load decrypted key after hydration
-  useEffect(() => {
-    loadKey();
-  }, []);
+  useEffect(() => { loadKey(); }, []);
 
-  // Auto-create first chat
   useEffect(() => {
     if (_hasHydrated && chats.length === 0) createChat();
   }, [_hasHydrated]);
@@ -43,13 +41,34 @@ export default function HomePage() {
   // Ctrl+K command palette
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setCommandOpen((v) => !v);
-      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); setCommandOpen((v) => !v); }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
+  }, []);
+
+  // GSAP ScrollTrigger parallax (loaded lazily after mount)
+  useEffect(() => {
+    let cleanup: (() => void) | null = null;
+    (async () => {
+      try {
+        const { gsap } = await import('gsap');
+        const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+        gsap.registerPlugin(ScrollTrigger);
+
+        const bg = document.querySelector<HTMLElement>('[data-parallax-bg]');
+        if (!bg) return;
+
+        gsap.to(bg, {
+          y: -60,
+          ease: 'none',
+          scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom top', scrub: true },
+        });
+
+        cleanup = () => ScrollTrigger.getAll().forEach((t) => t.kill());
+      } catch {}
+    })();
+    return () => cleanup?.();
   }, []);
 
   const activeChat = getActiveChat();
@@ -84,7 +103,8 @@ export default function HomePage() {
         if (!openrouterKey) {
           addMessage(chatId!, {
             role: 'assistant',
-            content: '⚠️ **OpenRouter API key diperlukan.**\n\nKlik tombol **API Keys** di sidebar atau tekan **Ctrl+K** → "Manage API Keys" untuk memasukkan key kamu.',
+            content:
+              '⚠️ **OpenRouter API key diperlukan.**\n\nKlik **API Keys** di sidebar atau tekan **Ctrl+K** → "Manage API Keys" untuk memasukkan key kamu.',
             model: selectedModel,
           });
           setIsStreaming(false);
@@ -93,7 +113,7 @@ export default function HomePage() {
         res = await fetch('/api/openrouter/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-api-key': openrouterKey },
-          body: JSON.stringify({ messages: history, model: selectedModel, stream: true }),
+          body: JSON.stringify({ messages: history, model: selectedModel, stream: true, temperature }),
           signal: abortRef.current.signal,
         });
       }
@@ -123,10 +143,7 @@ export default function HomePage() {
               parsed.choices?.[0]?.delta?.content ||
               parsed.result?.response ||
               '';
-            if (delta) {
-              full += delta;
-              setStreamingContent(full);
-            }
+            if (delta) { full += delta; setStreamingContent(full); }
           } catch {}
         }
       }
@@ -166,8 +183,13 @@ export default function HomePage() {
   return (
     <div className="h-screen w-screen flex overflow-hidden bg-[#05050A] relative">
       <CustomCursor />
-      <UnicornBackground />
-      <div className="absolute inset-0 bg-[#05050A]/35 z-0 pointer-events-none" />
+
+      {/* Background with parallax data attr */}
+      <div data-parallax-bg className="fixed inset-0 z-0 pointer-events-none will-change-transform">
+        <UnicornBackground />
+      </div>
+
+      <div className="absolute inset-0 bg-[#05050A]/40 z-0 pointer-events-none" />
       <ProgressBar active={isStreaming} />
 
       <div className="relative z-10 flex w-full h-full">
@@ -189,6 +211,8 @@ export default function HomePage() {
             onSend={sendMessage}
             isStreaming={isStreaming}
             onStop={() => abortRef.current?.abort()}
+            temperature={temperature}
+            onTemperatureChange={setTemperature}
           />
 
           <Footer />

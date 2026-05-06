@@ -31,6 +31,7 @@ interface ChatState {
   streamingContent: string;
   selectedModel: string;
   selectedProvider: 'openrouter' | 'cloudflare';
+  temperature: number;
   _hasHydrated: boolean;
   setHasHydrated: (v: boolean) => void;
 
@@ -44,6 +45,7 @@ interface ChatState {
   setStreamingContent: (v: string) => void;
   setSelectedModel: (model: string) => void;
   setSelectedProvider: (provider: 'openrouter' | 'cloudflare') => void;
+  setTemperature: (v: number) => void;
   getActiveChat: () => Chat | null;
   clearMessages: (chatId: string) => void;
 }
@@ -55,8 +57,9 @@ export const useChatStore = create<ChatState>()(
       activeChatId: null,
       isStreaming: false,
       streamingContent: '',
-      selectedModel: 'meta-llama/llama-3.1-8b-instruct:free',
-      selectedProvider: 'openrouter',
+      selectedModel: '@cf/meta/llama-3.1-8b-instruct',
+      selectedProvider: 'cloudflare',
+      temperature: 0.7,
       _hasHydrated: false,
       setHasHydrated: (v) => set({ _hasHydrated: v }),
 
@@ -93,7 +96,7 @@ export const useChatStore = create<ChatState>()(
             const messages = [...c.messages, msg];
             const title =
               c.messages.length === 0 && message.role === 'user'
-                ? message.content.slice(0, 40) + (message.content.length > 40 ? '…' : '')
+                ? message.content.slice(0, 42) + (message.content.length > 42 ? '…' : '')
                 : c.title;
             return { ...c, messages, title, updatedAt: Date.now() };
           }),
@@ -104,28 +107,20 @@ export const useChatStore = create<ChatState>()(
       updateMessage: (chatId, messageId, content) =>
         set((s) => ({
           chats: s.chats.map((c) =>
-            c.id !== chatId
-              ? c
-              : {
-                  ...c,
-                  messages: c.messages.map((m) =>
-                    m.id === messageId ? { ...m, content } : m
-                  ),
-                }
+            c.id !== chatId ? c : {
+              ...c,
+              messages: c.messages.map((m) => m.id === messageId ? { ...m, content } : m),
+            }
           ),
         })),
 
       setLike: (chatId, messageId, liked) =>
         set((s) => ({
           chats: s.chats.map((c) =>
-            c.id !== chatId
-              ? c
-              : {
-                  ...c,
-                  messages: c.messages.map((m) =>
-                    m.id === messageId ? { ...m, liked } : m
-                  ),
-                }
+            c.id !== chatId ? c : {
+              ...c,
+              messages: c.messages.map((m) => m.id === messageId ? { ...m, liked } : m),
+            }
           ),
         })),
 
@@ -133,6 +128,7 @@ export const useChatStore = create<ChatState>()(
       setStreamingContent: (v) => set({ streamingContent: v }),
       setSelectedModel: (model) => set({ selectedModel: model }),
       setSelectedProvider: (provider) => set({ selectedProvider: provider }),
+      setTemperature: (v) => set({ temperature: v }),
       getActiveChat: () => {
         const { chats, activeChatId } = get();
         return chats.find((c) => c.id === activeChatId) ?? null;
@@ -146,9 +142,7 @@ export const useChatStore = create<ChatState>()(
     }),
     {
       name: 'njirlah-chats-v2',
-      onRehydrateStorage: () => (state) => {
-        state?.setHasHydrated(true);
-      },
+      onRehydrateStorage: () => (state) => { state?.setHasHydrated(true); },
     }
   )
 );

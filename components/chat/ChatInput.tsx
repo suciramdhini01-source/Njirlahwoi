@@ -3,23 +3,25 @@
 import { useState, useRef, KeyboardEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Square } from 'lucide-react';
+import TemperatureSlider from '@/components/ui/TemperatureSlider';
 
 interface ChatInputProps {
   onSend: (content: string) => void;
   isStreaming: boolean;
   onStop?: () => void;
   disabled?: boolean;
+  temperature: number;
+  onTemperatureChange: (v: number) => void;
 }
 
-interface Ripple {
-  id: number;
-  x: number;
-  y: number;
-}
+interface Ripple { id: number; x: number; y: number; }
 
-export default function ChatInput({ onSend, isStreaming, onStop, disabled }: ChatInputProps) {
+export default function ChatInput({
+  onSend, isStreaming, onStop, disabled, temperature, onTemperatureChange,
+}: ChatInputProps) {
   const [value, setValue] = useState('');
   const [ripples, setRipples] = useState<Ripple[]>([]);
+  const [fillHover, setFillHover] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
 
@@ -27,7 +29,6 @@ export default function ChatInput({ onSend, isStreaming, onStop, disabled }: Cha
     const trimmed = value.trim();
     if (!trimmed || isStreaming) return;
 
-    // Ripple effect
     if (e && btnRef.current) {
       const rect = btnRef.current.getBoundingClientRect();
       const id = Date.now();
@@ -37,16 +38,11 @@ export default function ChatInput({ onSend, isStreaming, onStop, disabled }: Cha
 
     onSend(trimmed);
     setValue('');
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-    }
+    if (textareaRef.current) textareaRef.current.style.height = 'auto';
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
   const handleInput = () => {
@@ -64,19 +60,17 @@ export default function ChatInput({ onSend, isStreaming, onStop, disabled }: Cha
         <motion.div
           animate={{
             boxShadow: isStreaming
-              ? '0 0 20px rgba(6,182,212,0.3)'
+              ? '0 0 24px rgba(6,182,212,0.35), 0 0 48px rgba(6,182,212,0.1)'
               : value.trim()
-              ? '0 0 20px rgba(168,85,247,0.2)'
+              ? '0 0 24px rgba(168,85,247,0.25), 0 0 48px rgba(168,85,247,0.08)'
               : 'none',
           }}
+          transition={{ duration: 0.4 }}
           className="glass rounded-2xl p-3 flex items-end gap-3 border border-white/10"
         >
-          {/* Neon dot */}
+          {/* Pulsing neon dot */}
           <motion.div
-            animate={{
-              scale: [1, 1.3, 1],
-              backgroundColor: isStreaming ? '#06B6D4' : '#A855F7',
-            }}
+            animate={{ scale: [1, 1.4, 1], backgroundColor: isStreaming ? '#06B6D4' : '#A855F7' }}
             transition={{ duration: 1.5, repeat: Infinity }}
             className="w-1.5 h-1.5 rounded-full mb-2.5 flex-shrink-0"
           />
@@ -93,22 +87,40 @@ export default function ChatInput({ onSend, isStreaming, onStop, disabled }: Cha
             className="flex-1 bg-transparent text-white/90 placeholder-gray-600 text-sm resize-none outline-none leading-relaxed min-h-[24px] max-h-[200px] overflow-y-auto disabled:opacity-50"
           />
 
-          {/* Send / Stop button */}
+          {/* Temperature slider */}
+          <div className="flex-shrink-0 mb-0.5">
+            <TemperatureSlider value={temperature} onChange={onTemperatureChange} />
+          </div>
+
+          {/* Send / Stop button — fill text left-to-right on hover */}
           <div className="relative flex-shrink-0 overflow-hidden rounded-xl">
             <motion.button
               ref={btnRef}
               onClick={isStreaming ? onStop : (e) => handleSend(e as any)}
               disabled={!isStreaming && !canSend}
-              whileHover={canSend || isStreaming ? { scale: 1.05 } : {}}
-              whileTap={canSend || isStreaming ? { scale: 0.93 } : {}}
-              className={`relative p-2 rounded-xl transition-all overflow-hidden ${
+              onHoverStart={() => setFillHover(true)}
+              onHoverEnd={() => setFillHover(false)}
+              whileHover={canSend || isStreaming ? { scale: 1.06 } : {}}
+              whileTap={canSend || isStreaming ? { scale: 0.91 } : {}}
+              className={`relative p-2 rounded-xl transition-colors overflow-hidden ${
                 isStreaming
                   ? 'bg-neon-pink/20 text-neon-pink border border-neon-pink/40'
                   : canSend
-                  ? 'bg-neon-purple/20 text-neon-purple border border-neon-purple/40'
+                  ? 'border border-neon-purple/40'
                   : 'text-gray-700 cursor-not-allowed'
               }`}
             >
+              {/* Fill-text overlay (spec #23) */}
+              {canSend && !isStreaming && (
+                <motion.div
+                  className="absolute inset-0 bg-neon-purple/25 rounded-xl"
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: fillHover ? 1 : 0 }}
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                  style={{ originX: 0 }}
+                />
+              )}
+
               <AnimatePresence mode="wait">
                 {isStreaming ? (
                   <motion.div
@@ -117,6 +129,7 @@ export default function ChatInput({ onSend, isStreaming, onStop, disabled }: Cha
                     animate={{ scale: 1, rotate: 0 }}
                     exit={{ scale: 0, rotate: 90 }}
                     transition={{ type: 'spring', damping: 20 }}
+                    className="relative z-10"
                   >
                     <Square size={15} />
                   </motion.div>
@@ -124,21 +137,22 @@ export default function ChatInput({ onSend, isStreaming, onStop, disabled }: Cha
                   <motion.div
                     key="send"
                     initial={{ scale: 0, rotate: 90 }}
-                    animate={{ scale: 1, rotate: 0 }}
+                    animate={{ scale: 1, rotate: 0, color: fillHover && canSend ? '#A855F7' : undefined }}
                     exit={{ scale: 0, rotate: -90 }}
                     transition={{ type: 'spring', damping: 20 }}
+                    className="relative z-10"
                   >
                     <Send size={15} />
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              {/* Ripples */}
+              {/* Material ripples */}
               {ripples.map((r) => (
                 <motion.span
                   key={r.id}
-                  className="absolute rounded-full bg-neon-purple/40 pointer-events-none"
-                  initial={{ width: 0, height: 0, x: r.x, y: r.y, opacity: 0.6 }}
+                  className="absolute rounded-full bg-neon-purple/40 pointer-events-none z-20"
+                  initial={{ width: 0, height: 0, x: r.x, y: r.y, opacity: 0.7 }}
                   animate={{ width: 80, height: 80, x: r.x - 40, y: r.y - 40, opacity: 0 }}
                   transition={{ duration: 0.5, ease: 'easeOut' }}
                 />
@@ -148,7 +162,7 @@ export default function ChatInput({ onSend, isStreaming, onStop, disabled }: Cha
         </motion.div>
 
         <p className="text-center text-[10px] text-gray-700 mt-2">
-          Enter kirim · Shift+Enter baris baru · Ctrl+K command palette
+          Enter kirim · Shift+Enter baris baru · Ctrl+K palette · 🌡️ temp AI
         </p>
       </div>
     </div>
