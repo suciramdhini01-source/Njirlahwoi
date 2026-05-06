@@ -34,10 +34,16 @@ Required env vars:
 - `components/layout/` — Sidebar (hold-to-delete, swipe, search), Header (anime.js path draw, split text), Footer (anime.js unicorn walk), UnicornBackground (canvas + react-spring glow)
 - `components/ui/` — ApiKeyModal, ModelSelector (tilt card, magnetic chips, ProviderFolder), CustomCursor, CommandPalette, ProgressBar, ToastStack, TemperatureSlider, HoldToDelete, MultiStateBadge, ProviderFolder, ScrollReveal, ImageReveal
 - `store/chat-store.ts` — Chat state (messages, streaming, model, temperature)
-- `store/api-key-store.ts` — BYOK key (AES-GCM encrypted in localStorage)
-- `lib/openrouter.ts` — FREE_MODELS list + fetchOpenRouterModels + SUPPORTED_PROVIDERS
-- `lib/cloudflare.ts` — CF default models + fetchCloudflareModels
-- `lib/encryption.ts` — AES-GCM encrypt/decrypt
+- `store/api-key-store.ts` — BYOK key (AES-GCM encrypted in localStorage), `setKey`, `loadKey`, `clearKey`, `testConnection`
+- `store/model-store.ts` — ModelInfo[] for OpenRouter + Cloudflare, `fetchOpenRouterModels`, `fetchCloudflareModels`
+- `store/model.ts` — Legacy store (UI-facing, AIModel type from `types/index.ts`)
+- `lib/openrouter.ts` — FREE_MODELS, SUPPORTED_PROVIDERS, `fetchOpenRouterModels`, `openRouterChat`
+- `lib/cloudflare.ts` — DEFAULT_CLOUDFLARE_MODELS, `fetchCloudflareModels`, `cloudflareChat`
+- `lib/encryption.ts` — `encryptApiKey`/`decryptApiKey` (hex, new), `encrypt`/`decrypt` (base64, legacy compat)
+- `utils/derive-encryption-key.ts` — `deriveEncryptionKey()` from browser fingerprint (SHA-256 → AES-GCM CryptoKey)
+- `types/model-types.ts` — `ModelInfo` interface (spec-aligned)
+- `types/chat-types.ts` — `Chat` + `Message` interfaces (spec-aligned)
+- `app/api/openrouter/models/` — POST proxy for OpenRouter model list (x-api-key header)
 - `hooks/useFollowPointer.ts` — react-spring pointer tracking
 - `hooks/useGSAPParallax.ts` — GSAP ScrollTrigger parallax + scroll zoom
 

@@ -9,14 +9,18 @@ export async function POST(req: NextRequest) {
 
     if (!cfToken || !cfAccountId) {
       return NextResponse.json(
-        { error: 'Cloudflare tidak dikonfigurasi di server.' },
+        { error: 'Cloudflare tidak dikonfigurasi di server. Hubungi admin.' },
         { status: 503 }
       );
     }
 
-    const body = await req.json();
+    const body = (await req.json()) as {
+      messages: { role: string; content: string }[];
+      model?: string;
+      stream?: boolean;
+    };
     const { messages, model, stream = true } = body;
-    const modelId = model || '@cf/meta/llama-3.1-8b-instruct';
+    const modelId = model ?? '@cf/meta/llama-3.1-8b-instruct';
 
     const res = await fetch(
       `https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/ai/run/${modelId}`,
@@ -46,7 +50,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(await res.json());
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Internal server error';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

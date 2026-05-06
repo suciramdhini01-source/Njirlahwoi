@@ -12,8 +12,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const body = await req.json();
-    const { messages, model, stream = true } = body;
+    const body = (await req.json()) as {
+      messages: { role: string; content: string }[];
+      model?: string;
+      stream?: boolean;
+      temperature?: number;
+      max_tokens?: number;
+    };
+    const { messages, model, stream = true, temperature, max_tokens } = body;
+
+    const payload: Record<string, unknown> = {
+      model: model ?? 'meta-llama/llama-3.1-8b-instruct:free',
+      messages,
+      stream,
+    };
+    if (temperature !== undefined) payload.temperature = temperature;
+    if (max_tokens !== undefined) payload.max_tokens = max_tokens;
 
     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -23,7 +37,7 @@ export async function POST(req: NextRequest) {
         'HTTP-Referer': 'https://njirlah.ai',
         'X-Title': 'NJIRLAH AI',
       },
-      body: JSON.stringify({ model: model || 'meta-llama/llama-3.1-8b-instruct:free', messages, stream }),
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
@@ -42,7 +56,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(await res.json());
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Internal server error';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
