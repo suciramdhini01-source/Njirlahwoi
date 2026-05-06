@@ -1,0 +1,185 @@
+
+KAMU ADALAH AI BACKEND & INTEGRATION ENGINEER. TUGASMU MEMBANGUN SELURUH LOGIKA AI, API PROXY, STATE MANAGEMENT, ENKRIPSI, DAN INTEGRASI MODEL UNTUK APLIKASI **NJIRLAH AI**. FOKUS HANYA PADA BAGIAN NON‑VISUAL. JANGAN MEMBUAT SATU BARIS PUN KODE UI/UX, CSS, ATAU KOMPONEN REACT. KAMU HANYA BEKERJA DI SISI SERVER, LIBRARY, STORE, DAN TIPE DATA. GAGAL BUKAN PILIHAN.
+
+---
+
+## 1. DESKRIPSI SISTEM AI
+NJIRLAH AI adalah platform chat multi‑model dengan dua sumber model:
+- **OpenRouter** → WAJIB BYOK. Pengguna memasukkan API key miliknya. Tanpa key, tidak ada akses.
+- **Cloudflare Workers AI** → Token API disediakan server (bukan BYOK), selalu tersedia.
+
+Kedua sumber diakses melalui proxy API route Next.js agar kunci tetap aman.
+
+---
+
+## 2. TECH STACK AI (WAJIB)
+- **Next.js 15** (App Router) dengan **TypeScript strict**
+- **Web Crypto API** (hanya di sisi klien, untuk enkripsi kunci)
+- **Zustand** (state management untuk kunci API, daftar model, riwayat chat – logika saja, tanpa UI)
+- **Server‑side environment variables**: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
+- **OpenRouter REST API** (`https://openrouter.ai/api/v1`)
+- **Cloudflare Workers AI REST API** (`https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/run/`)
+- **Streaming** dengan Server‑Sent Events (SSE) di kedua proxy.
+
+---
+
+## 3. ARSITEKTUR BACKEND (PROXY ONLY)
+
+### a. Endpoint OpenRouter Chat (BYOK)
+- File: `app/api/openrouter/chat/route.ts`
+- Method: `POST`
+- Menerima header HTTP `x-api-key` dari client.
+- Meneruskan request ke `https://openrouter.ai/api/v1/chat/completions` dengan header:
+  - `Authorization: Bearer <x-api-key>`
+  - `Content-Type: application/json`
+- Body yang diteruskan sama persis dari client: `{ model, messages, stream, max_tokens, ... }`
+- **WAJIB mendukung streaming (SSE)**. Jika `stream: true`, gunakan `fetch` dengan `response.body` sebagai `ReadableStream`, lalu teruskan chunk demi chunk ke client dengan header `Content-Type: text/event-stream`.
+- **JANGAN PERNAH** menyimpan, log, atau mengirim key ke tempat lain. Hanya proxy transparan.
+
+### b. Endpoint Cloudflare Workers AI Chat (Built‑in Token)
+- File: `app/api/cloudflare/chat/route.ts`
+- Method: `POST`
+- Membaca environment variable `CLOUDFLARE_API_TOKEN` dan `CLOUDFLARE_ACCOUNT_ID`.
+- Menerima body dari client: `{ model, messages, ... }`
+- Memanggil:  
+  `POST https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${model}`  
+  dengan header `Authorization: Bearer ${token}`.
+- Format body yang dikirim ke Cloudflare harus sesuai spesifikasi Workers AI:  
+  `{ messages: [...] }` (bisa disesuaikan dengan input client).
+- **WAJIB mendukung streaming** jika Cloudflare memberikan respons SSE. Teruskan stream ke client.
+
+---
+
+## 4. ENKRIPSI KUNCI OPENROUTER DI CLIENT‑SIDE
+- File: `lib/encryption.ts`
+- Hanya berisi fungsi murni (tidak ada React/JSX).
+- **Gunakan Web Crypto API (AES‑GCM)**.
+- Kunci enkripsi diturunkan dari **karakteristik unik browser**: `userAgent + screen.width + screen.height`. Hash dengan SHA‑256, lalu import sebagai CryptoKey.
+- Fungsi:
+  - `encryptApiKey(plainText: string): Promise<string>` → mengembalikan ciphertext dalam format hex.
+  - `decryptApiKey(cipherHex: string): Promise<string>` → mengembalikan plainText.
+- Jika kunci tidak bisa dienkripsi/didekripsi, lempar error yang jelas.
+
+---
+
+## 5. STATE MANAGEMENT (ZUSTAND)
+**Tidak ada UI di sini.** Hanya store murni.
+
+### `store/api-key-store.ts`
+- State:
+  - `openrouterKey: string | null` (plain text hanya saat di memori, setelah dekripsi; tidak disimpan ke localStorage mentah)
+  - `isKeyValid: boolean`
+- Actions:
+  - `setKey(key: string): void` → enkripsi, simpan ke localStorage, lalu set plain text lokal.
+  - `loadKey(): void` → baca dari localStorage, dekripsi, set ke state.
+  - `clearKey(): void` → hapus dari localStorage dan state.
+  - `testConnection(): Promise<boolean>` → panggil `GET https://openrouter.ai/api/v1/models` dengan key sekarang. Return true jika berhasil.
+- Catatan: Key hanya ada di memori saat sesi; jangan disimpan di Zustand persisten.
+
+### `store/chat-store.ts`
+- State:
+  - `chats: Record<string, Chat>` (key: chatId)
+  - `activeChatId: string | null`
+- Types:
+  - `Chat { id, modelSource: 'openrouter' | 'cloudflare', modelName, messages: Message[] }`
+  - `Message { role, content, timestamp, tokenUsage? }`
+- Actions:
+  - `addMessage(chatId, message)`, `createChat(...)`, `deleteChat(id)`, dll.
+- **Tidak ada UI**, hanya logika penyimpanan sementara di memori.
+
+### `store/model-store.ts`
+- State:
+  - `openrouterModels: ModelInfo[]`
+  - `cloudflareModels: ModelInfo[]`
+  - `isLoadingModels: boolean`
+- Actions:
+  - `fetchOpenRouterModels(apiKey: string)` → panggil `GET https://openrouter.ai/api/v1/models` dengan header `Authorization: Bearer ${apiKey}`, simpan hasilnya.
+  - `fetchCloudflareModels()` → panggil API route internal yang menggunakan token server (atau langsung fetch dari server side). Simpan.
+- `ModelInfo` type: `{ id, name?, provider?, pricing?: { prompt, completion }, free: boolean }`
+
+---
+
+## 6. INTEGRASI MODEL OPENROUTER (DINAMIS, BYOK)
+- **Tidak boleh hardcode model list**. Selalu fetch dari API setelah key diberikan.
+- Filter provider: daftar **55 provider** berikut harus muncul sebagai opsi filter (tidak perlu di‑hardcode sebagai daftar lengkap, tapi logic filter harus mendukungnya). Provider list:
+```
+AI21, AionLabs, AkashML, Alibaba Cloud Int., Amazon Bedrock, Anthropic, Arcee AI, AtlasCloud, Azure, Baidu Qianfan, Baseten, Cerebras, Chutes, Clarifai, Cohere, DeepInfra, DeepSeek, Featherless, Fireworks, Friendli, GMICloud, Google AI Studio, Google Vertex, Groq, Inception, Inceptron, Infermatic, Inflection, io.net, Liquid, Mancer, MiniMax, Mistral, Moonshot AI, Morph, Nebius Token Factory, NextBit, NovitaAI, OpenAI, OpenInference, Parasail, Perplexity, Phala, Reka AI, Relace, SambaNova, SiliconFlow, StepFun, Switchpoint, Together, Venice, Weights & Biases, xAI, Xiaomi, Z.ai
+```
+- Dari respons `/models`, tentukan apakah model gratis (pricing bernilai `0` atau string `"0"`). Beri properti `free: true`. Model gratis yang umum:
+```
+google/gemma-2-9b-it:free, google/learnlm-1.5-pro-experimental:free, meta-llama/llama-3.1-8b-instruct:free, meta-llama/llama-3.1-70b-instruct:free, meta-llama/llama-3.2-1b-instruct:free, meta-llama/llama-3.2-3b-instruct:free, mistralai/pixtral-12b:free, mistralai/mistral-7b-instruct:free, qwen/qwen-2-7b-instruct:free, qwen/qwen-2.5-7b-instruct:free, qwen/qwen-2.5-coder-32b-instruct:free, nvidia/llama-3.1-nemotron-70b-instruct:free, microsoft/phi-3-medium-128k-instruct:free, microsoft/phi-3-mini-128k-instruct:free, gryphe/mythomax-l2-13b:free, openrouter/auto:free
+```
+
+---
+
+## 7. INTEGRASI CLOUDFLARE WORKERS AI (BUILT‑IN)
+- Daftar model text generation diambil dari:  
+  `GET https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/models?task=text-generation`
+- Gunakan token server (jangan kirim token ke client). Buat API route **khusus untuk fetch model**:
+  - `GET /api/cloudflare/models` → kembalikan daftar model (filter task `text-generation`).
+- Jika fetch gagal, fallback ke daftar hardcode minimal 10 model terbaru (misal: `@cf/meta/llama-3.1-8b-instruct`, `@cf/mistral/mistral-7b-instruct-v0.1`, `@cf/deepseek/deepseek-r1`, dll.).
+
+---
+
+## 8. TYPES DEFINITION
+- File: `types/model-types.ts`
+```typescript
+interface ModelInfo {
+  id: string;
+  name: string;
+  provider: string;
+  pricing?: { prompt: string; completion: string };
+  free: boolean;
+  source: 'openrouter' | 'cloudflare';
+}
+```
+- File: `types/chat-types.ts`
+```typescript
+interface Chat {
+  id: string;
+  modelSource: 'openrouter' | 'cloudflare';
+  modelId: string;
+  messages: Message[];
+  createdAt: number;
+}
+
+interface Message {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: number;
+  tokenUsage?: { prompt: number; completion: number };
+}
+```
+
+---
+
+## 9. DELIVERABLES (KODE YANG HARUS DIHASILKAN)
+Kamu harus memberikan **hanya kode file‑file berikut** tanpa komentar UI/JSX/HTML/CSS:
+1. `lib/encryption.ts`
+2. `lib/openrouter.ts` (helper untuk fetch models, chat completion)
+3. `lib/cloudflare.ts` (helper fetch models, chat)
+4. `store/api-key-store.ts`
+5. `store/model-store.ts`
+6. `store/chat-store.ts`
+7. `app/api/openrouter/chat/route.ts`
+8. `app/api/cloudflare/chat/route.ts`
+9. `app/api/cloudflare/models/route.ts` (GET endpoint untuk model Cloudflare, menggunakan token server)
+10. `types/model-types.ts`
+11. `types/chat-types.ts`
+12. `utils/derive-encryption-key.ts` (helper untuk menghasilkan CryptoKey dari karakteristik browser)
+
+**Tidak boleh ada** file `.tsx`, komponen, atau styling. Hanya kode TypeScript murni.
+
+---
+
+## 10. ATURAN STRICT
+- TypeScript **strict mode** di seluruh file. Tidak boleh `any`.
+- Error handling wajib: network error, invalid key, rate limit.
+- Key **tidak boleh** muncul di log server. Gunakan header `x-api-key` hanya untuk forward.
+- Streaming harus diimplementasikan dengan benar menggunakan `ReadableStream` dan `TextDecoder`.
+- Untuk Cloudflare models endpoint, pastikan hanya mengembalikan model dengan task `text-generation`.
+
+---
+
+
+`
