@@ -1,0 +1,254 @@
+---
+
+```text
+KAMU ADALAH AI FULL‑STACK ENGINEER, UI/UX DESIGNER, DAN AI INTEGRATION ARCHITECT. TUGASMU MEMBANGUN SELURUH APLIKASI **NJIRLAH AI** DARI NOL, 100% PRODUCTION‑READY, MELIPUTI BACKEND AI, FRONTEND DENGAN SEMUA ANIMASI PREMIUM, LOGO, DAN HALAMAN LENGKAP. KAMU HARUS MENGIKUTI SEMUA SPESIFIKASI DI BAWAH INI DENGAN TEGAS. TIDAK BOLEH MENYIMPANG, MENGURANGI, ATAU MENAMBAH DI LUAR INSTRUKSI. GAGAL BUKAN PILIHAN.
+
+---
+
+## 1. DESKRIPSI APLIKASI
+NJIRLAH AI adalah platform chat multi‑model AI dengan **DUA SUMBER MODEL**, keduanya **WAJIB BYOK**:
+
+- **OpenRouter** → Pengguna memasukkan API key miliknya (bisa yang gratis). Tanpa key, tidak bisa akses model OpenRouter.
+- **Cloudflare Workers AI** → Pengguna memasukkan **API Token** dan **Account ID** miliknya sendiri. Tanpa itu, tidak bisa akses model Cloudflare.
+
+**Tidak ada kunci API bawaan server.** Semua kunci disimpan terenkripsi di localStorage pengguna.
+
+Terdapat tiga halaman:
+1. **Chat** (`/`) – Chat dengan model AI, pilih model dari dua sumber (jika key tersedia), lihat riwayat.
+2. **Agent Code Generator** (`/agent`) – Agen AI membangun proyek web lengkap, kode dihasilkan baris demi baris secara streaming, ditampilkan di IDE dengan syntax highlighting, dan pratinjau langsung di panel kanan.
+3. **App Preview** (`/preview`) – Tampilan bergaya emergent.sh: panel kiri alur kerja agen (workflow steps), panel kanan live preview dengan simulated browser.
+
+---
+
+## 2. TECH STACK (WAJIB, TIDAK BOLEH DIGANTI)
+- Next.js 15 (App Router) + TypeScript strict mode
+- Tailwind CSS 4 + custom theme (neon purple/cyan/pink, glassmorphism)
+- shadcn/ui (semua komponen dasar)
+- Framer Motion (animasi React, gesture, AnimatePresence, drag, layout)
+- GSAP (animasi kompleks, scroll trigger, morph, 3D)
+- react-spring (animasi berbasis fisika, parallax, follow pointer)
+- react-transition-group (transisi mounting/unmounting CSS)
+- anime.js (path drawing, morph, efek khusus)
+- Zustand (state management)
+- Web Crypto API (enkripsi kunci OpenRouter & Cloudflare di sisi klien)
+- react-syntax-highlighter (syntax highlighting di editor Agent, tema oneDark)
+- JSZip (download proyek)
+- canvas-confetti (confetti setelah agent selesai)
+- Unicorn.Studio (embed WebGL scene sebagai background)
+- Vercel deployment
+
+---
+
+## 3. ARSITEKTUR BACKEND (PROXY TRANSPARAN)
+**Semua endpoint hanya sebagai proxy.** Tidak menyimpan, tidak log kunci.
+
+### 3.1 Proxy OpenRouter Chat (BYOK)
+- File: `app/api/openrouter/chat/route.ts`
+- Method: `POST`
+- Menerima header `x-api-key` dari client.
+- Meneruskan request ke `https://openrouter.ai/api/v1/chat/completions` dengan header `Authorization: Bearer {key}`.
+- **Wajib dukung streaming (SSE)**.
+
+### 3.2 Proxy Cloudflare Workers AI Chat (BYOK)
+- File: `app/api/cloudflare/chat/route.ts`
+- Method: `POST`
+- Menerima header `x-cf-token` dan `x-cf-account-id` dari client.
+- Panggil `POST https://api.cloudflare.com/client/v4/accounts/{accountId}/ai/run/{model}` dengan token.
+- **Wajib dukung streaming**.
+
+### 3.3 Agent Generate (BYOK via pilihan sumber)
+- File: `app/api/agent/generate/route.ts`
+- Method: `POST`
+- Body: `{ prompt, modelSource, modelId }`
+- Baca key dari header sesuai sumber (`x-api-key` untuk OpenRouter, `x-cf-token` + `x-cf-account-id` untuk Cloudflare).
+- Bangun system prompt untuk menghasilkan kode proyek web, format ketat `###FILE:`.
+- Streaming, parsing, kirim SSE (`file_start`, `file_chunk`, `file_end`, `agent_log`, `done`, `error`).
+
+### 3.4 Proxy Model Fetch untuk Cloudflare (BYOK)
+- File: `app/api/cloudflare/models/route.ts`
+- Method: `POST`
+- Menerima header `x-cf-token` dan `x-cf-account-id`.
+- Panggil `GET https://api.cloudflare.com/client/v4/accounts/{accountId}/ai/models?task=text-generation` dengan token.
+- Kembalikan daftar model.
+
+---
+
+## 4. ENKRIPSI KUNCI (CLIENT‑SIDE)
+- File: `lib/encryption.ts`
+- Dua kunci disimpan: `openrouterKey` dan `cloudflareToken` + `cloudflareAccountId`.
+- Gunakan Web Crypto API (AES‑GCM) dengan kunci enkripsi dari **userAgent + screen** (hash SHA‑256) + **passphrase opsional** (PIN 6 digit).
+- Simpan ciphertext di localStorage, plaintext hanya saat dibutuhkan di memory Zustand.
+- Fungsi: `encrypt(key)`, `decrypt(cipher)`.
+
+---
+
+## 5. MODEL & PROVIDER (DINAMIS, FULL BYOK)
+### 5.1 OpenRouter
+- Fetch `GET https://openrouter.ai/api/v1/models` dengan `x-api-key`.
+- Tampilkan semua model. Filter provider untuk **55 provider**:
+```
+AI21, AionLabs, AkashML, Alibaba Cloud Int., Amazon Bedrock, Anthropic, Arcee AI, AtlasCloud, Azure, Baidu Qianfan, Baseten, Cerebras, Chutes, Clarifai, Cohere, DeepInfra, DeepSeek, Featherless, Fireworks, Friendli, GMICloud, Google AI Studio, Google Vertex, Groq, Inception, Inceptron, Infermatic, Inflection, io.net, Liquid, Mancer, MiniMax, Mistral, Moonshot AI, Morph, Nebius Token Factory, NextBit, NovitaAI, OpenAI, OpenInference, Parasail, Perplexity, Phala, Reka AI, Relace, SambaNova, SiliconFlow, StepFun, Switchpoint, Together, Venice, Weights & Biases, xAI, Xiaomi, Z.ai
+```
+- Model gratis (label GRATIS) seperti daftar sebelumnya (tetap perlu key pengguna).
+
+### 5.2 Cloudflare Workers AI
+- Fetch via proxy `/api/cloudflare/models` (POST, dengan header token/account).
+- Tampilkan semua model teks. Jika gagal, fallback ke daftar hardcode minimal 10 model.
+
+---
+
+## 6. UI/UX GLOBAL
+- **Tema**: `bg-[#05050A]`, glassmorphism `backdrop-blur-2xl bg-white/5 border-white/10`, warna neon: purple #A855F7, cyan #06B6D4, pink #EC4899.
+- **Font**: Inter (body), Space Grotesk (heading).
+- **Background**: Unicorn.Studio WebGL full‑screen fixed (z‑0) + overlay `bg-black/70 backdrop-blur-sm`.
+- **Logo**: `NJIRLAHLogo.tsx` – unicorn neon glitch, path draw, klik 3x = easter egg unicorn menari.
+- **Footer** di setiap halaman:
+```tsx
+<footer className="mt-auto border-t border-white/10 bg-black/40 backdrop-blur-md py-6 text-center">
+  <p className="text-lg font-bold text-neon-pink flex items-center justify-center gap-2">
+    Dibuat dengan <span className="animate-pulse text-red-500">❤️</span> oleh <span className="underline decoration-neon-purple">Andikaa Saputraa</span>
+  </p>
+  <p className="text-sm text-gray-400 mt-1">
+    Membangun masa depan AI yang bebas, tanpa batas, ala kadarnya tapi njir lah keren.
+  </p>
+  <p className="text-xs text-gray-500 mt-2">© {new Date().getFullYear()} NJIRLAH AI</p>
+</footer>
+```
+
+---
+
+## 7. FULL ANIMATION REQUIREMENTS (52 ITEM – WAJIB SEMUA)
+Gunakan kombinasi Framer Motion, GSAP, react-spring, react-transition-group, anime.js untuk mengimplementasikan **semua animasi berikut** di berbagai komponen:
+
+1. Spring physics (semua transisi)
+2. Drag (sidebar collapse/expand)
+3. Enter/exit animation (AnimatePresence pada setiap mount/unmount)
+4. Gesture (tap/double‑tap pada kartu model)
+5. Stagger text appearance (kata per kata di chat)
+6. Keyframes & wildcards (loop: floating unicorn, glow pulse)
+7. Rotate 360° (refresh icon saat fetching)
+8. Spinning 3D cube (loading screen)
+9. Loading circle spinner (neon)
+10. Loading jumping dots (AI typing)
+11. Loading ripple (klik tombol kirim)
+12. Loading pulse dots (header koneksi)
+13. Follow pointer with spring (glow mengikuti mouse)
+14. Layout animation (sidebar, device viewport)
+15. Material Design ripple (tombol, list item)
+16. Motion along a path (unicorn berjalan di footer)
+17. Parallax (background dengan scroll – GSAP ScrollTrigger)
+18. Path drawing (logo SVG neon)
+19. Split text (heading "NJIRLAH AI" animasi per huruf)
+20. Tilt card (kartu model mengikuti mouse)
+21. Accordion (riwayat chat expand/collapse)
+22. Fill text (tombol "Send" terisi warna saat hover)
+23. Loading progress bar (di atas chat area saat streaming)
+24. Scroll Direction: Hide Header (GSAP)
+25. Cursor: Floating target (lingkaran kecil mengikuti mouse, spring)
+26. Cursor trail (partikel neon)
+27. Cursor trail velocity (panjang jejak berdasarkan kecepatan)
+28. Hold to confirm (tombol hapus chat dengan progress 2 detik)
+29. Image reveal slider (transisi panel overlay)
+30. Infinite loading (dropdown model)
+31. iOS slider (temperature slider, draggable)
+32. Magnetic filings (chip provider saling tarik saat mouse dekat)
+33. Multi‑state badge (Online/Offline/Typing)
+34. iOS Notifications stack (toast bertumpuk, swipe)
+35. Path morphing (icon send → checkmark, GSAP)
+36. Smooth tabs (tab "Chat"/"Models", sliding indikator)
+37. Tab select (pop pada tab aktif)
+38. Variants (staggerChildren di semua list)
+39. Loading overlay (glass overlay saat ganti model)
+40. Scroll velocity: 3D planes (background gerak berdasarkan scroll)
+41. Scroll Image Reveal (teks reveal saat scroll ke bawah)
+42. Scroll Zoom Hero (logo membesar saat scroll)
+43. iOS App Store Card stack (riwayat chat sebagai kartu bertumpuk, swipe)
+44. Swipe actions (swipe kiri untuk hapus riwayat)
+45. Apple Intelligence ripple (lingkaran warna‑warni di sekitar avatar AI)
+46. Carousel: iOS exposure slider (pemilih model sebagai slider horizontal)
+47. iOS App Folder (grup provider membesar seperti folder iOS)
+48. Command Palette (`Ctrl+K`: scale+fade)
+49. Hover glow pada tombol (neon shadow)
+50. Confetti setelah agent selesai generate
+51. Animated heart beat (di footer)
+52. Unicorn Easter Egg (klik logo 3x: unicorn menari Framer Motion)
+
+---
+
+## 8. HALAMAN CHAT (`/`)
+- Sidebar kiri (glass): navigasi (`/agent`, `/preview`), input OpenRouter key, input Cloudflare token+account, riwayat chat, tombol New Chat.
+- Main panel: Header, ModelSelector (gabungan OpenRouter & Cloudflare, filter provider), chat area, input box.
+- ChatBubble, TypingIndicator, tombol send dengan path morphing.
+
+---
+
+## 9. HALAMAN AGENT CODE GENERATOR (`/agent`)
+- Panel kiri: Agent IDE (FileTree, CodeEditor dengan syntax highlighting, input prompt, tombol Generate/Stop).
+- Panel kanan: Live Preview (BrowserFrame, DeviceControls, iframe dengan srcdoc yang diperbarui otomatis). Gunakan Babel standalone untuk JSX.
+- Confetti saat agen selesai.
+- Download ZIP.
+
+---
+
+## 10. HALAMAN APP PREVIEW (`/preview`) – ALA EMERGENT.SH
+**Konsep: "Integrated Development View"**
+- Panel kiri (40%): **Agent Workflow Panel**
+  - Judul "Agent Workflow"
+  - List langkah terstruktur (Step 1, Step 2...), indikator status (✅ selesai, 🔄 berjalan, ⏳ pending).
+  - Setiap langkah: nama, deskripsi, file yang diedit (tautan biru), waktu eksekusi.
+  - Area input: "Ask the Agent about the next step...", tombol "View Proposed Plan", "Save", "Fork".
+- Panel kanan (60%): **Live Preview**
+  - BrowserFrame simulasi (URL bar, tombol titik, refresh).
+  - DeviceControls (Desktop/Tablet/Mobile) – viewport berubah lebar dengan animasi layout.
+  - Viewport menampilkan pratinjau proyek yang dihasilkan (iframe).
+- Data workflow bisa berasal dari store agent (langkah yang sudah dihasilkan) atau simulasi berdasarkan progres agent.
+
+---
+
+## 11. STATE MANAGEMENT (ZUSTAND)
+- `useApiKeyStore`: `openrouterKey`, `cloudflareToken`, `cloudflareAccountId` (plaintext, dari enkripsi), metode `setKey`, `clearKey`, `testConnection`.
+- `useModelStore`: `openrouterModels`, `cloudflareModels`, fetch models.
+- `useChatStore`: chats, activeChat, streaming.
+- `useAgentStore`: files, activeFile, isGenerating, logs, steps (untuk workflow).
+
+---
+
+## 12. DELIVERABLES
+Hasilkan **semua file** berikut:
+
+```
+njirlah-ai/
+├── app/
+│   ├── layout.tsx
+│   ├── page.tsx
+│   ├── agent/page.tsx
+│   ├── preview/page.tsx
+│   ├── api/
+│   │   ├── openrouter/chat/route.ts
+│   │   ├── cloudflare/chat/route.ts
+│   │   ├── cloudflare/models/route.ts
+│   │   └── agent/generate/route.ts
+├── components/
+│   ├── layout/ (Sidebar, Footer, Logo)
+│   ├── chat/ (ChatPanel, ChatBubble, ModelSelector, TypingIndicator)
+│   ├── agent/ (AgentCodePanel, FileTree, CodeEditor)
+│   ├── preview/ (LivePreviewPanel, BrowserFrame, DeviceControls, WorkflowPanel, StepItem)
+│   └── animations/ (CursorTrail, HoldToConfirm, dll. – banyak komponen animasi)
+├── lib/ (encryption, agent-parser, build-preview-html, openrouter, cloudflare)
+├── store/ (api-key, model, chat, agent)
+├── types/
+└── config files
+```
+
+**Tidak boleh ada placeholder.** Semua kode harus nyata, siap copy‑paste.
+
+---
+
+## 13. PERINTAH AKHIR
+**BANGUN SELURUH KODE LENGKAP.** Setiap file harus diisi. Ikuti spesifikasi 100%. Aplikasi harus berjalan dengan `npm run dev` setelah mengisi **environment variable kosong** (tidak ada API key server).
+
+**MULAI SEKARANG. KAMU TIDAK BOLEH GAGAL. NJIRLAH AI HARUS MENJADI APLIKASI CHAT AI PALING KEREN, BERANIMASI, DAN PRODUCTION‑READY DENGAN BYOK PENUH.**
+```
+
+---
+.
