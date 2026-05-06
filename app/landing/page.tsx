@@ -32,12 +32,12 @@ export default function LandingPage() {
           </nav>
 
           <div className="flex gap-3">
-            <Link href="/dashboard">
+            <Link href="/sign-in">
               <Button variant="outline" size="sm">
                 Sign In
               </Button>
             </Link>
-            <Link href="/">
+            <Link href="/sign-up">
               <Button size="sm" className="bg-gradient-to-r from-cyan-600 to-blue-600">
                 Start Building
               </Button>
@@ -61,7 +61,7 @@ export default function LandingPage() {
           </p>
 
           <div className="flex gap-3 justify-center mb-12">
-            <Link href="/">
+            <Link href="/sign-up">
               <Button size="lg" className="bg-gradient-to-r from-cyan-600 to-blue-600 px-8">
                 Start Free <ArrowRight className="ml-2 w-4 h-4" />
               </Button>

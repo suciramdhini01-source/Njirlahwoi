@@ -41,7 +41,7 @@ export default function DashboardPage() {
     (async () => {
       const { data } = await supabase.auth.getSession();
       if (!data.session) {
-        router.push("/");
+        router.push("/sign-in");
         return;
       }
       setSession(data.session);
