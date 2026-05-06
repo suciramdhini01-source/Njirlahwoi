@@ -1,0 +1,156 @@
+
+
+---
+
+```text
+Kamu adalah AI Lead Full‑Stack Engineer dan AI Integration Architect. Tugasmu membangun aplikasi web **NJIRLAH AI** secara utuh, production‑ready, dengan **zero kompromi** pada spesifikasi di bawah ini. Ikuti setiap poin secara harfiah.
+
+---
+
+## 🌐 1. NJIRLAH AI – KONSEP UTAMA
+NJIRLAH AI adalah platform chat AI multi‑model dengan dua mode:
+1. **Mode Tamu (Guest)** – Pengguna **TIDAK PERLU API key**. Aplikasi menggunakan API key gratis bawaan (dari environment variable server) untuk mengakses **seluruh model gratis OpenRouter** yang terdaftar di bawah.
+2. **Mode BYOK (Bring Your Own Key)** – Pengguna memasukkan kunci OpenRouter dan/atau Cloudflare Workers AI miliknya sendiri. Kunci **tidak pernah disimpan di server**, hanya dienkripsi di localStorage. Dengan BYOK, pengguna dapat mengakses **semua model dari 55 provider** yang didukung OpenRouter.
+
+Branding: **edgy, playful, premium** – kombinasi Tailwind glassmorphism + animasi WebGL dari Unicorn.Studio + warna neon purple/cyan/pink. Nama situs: **NJIRLAH AI**. Tagline: “Chat AI Tersesat, Bebas Pake Kunci Sendiri”.
+
+---
+
+## ⚙️ 2. TECH STACK (WAJIB)
+- **Next.js 15** (App Router) + TypeScript strict
+- **Tailwind CSS 4** dengan custom theme
+- **shadcn/ui** untuk komponen dasar (dialog, dropdown, input, toast, dsb.)
+- **Framer Motion** untuk animasi UI
+- **Unicorn.Studio** (embed WebGL scene wajib di background penuh)
+- **Zustand** untuk state management global
+- **Web Crypto API** untuk enkripsi sisi klien
+- **OpenRouter REST API** (proxy streaming wajib)
+- **Cloudflare Workers AI REST API** (proxy streaming wajib)
+- **Vercel** deployment
+
+---
+
+## 🔐 3. KEAMANAN & ARSITEKTUR BYOK (THE LAW)
+1. Semua kunci pengguna **hanya disimpan di localStorage**, dienkripsi dengan AES‑GCM (Web Crypto API). Passphrase turunan dari kombinasi unik browser.
+2. API routes server hanya bertindak sebagai **proxy transparan**:
+   - `POST /api/openrouter/chat` – membaca header `x-api-key` dari request, meneruskannya ke OpenRouter **tanpa menyimpan**.
+   - `POST /api/cloudflare/chat` – membaca `x-cf-token` dan `x-cf-account-id`, meneruskan ke Cloudflare.
+3. **Tidak boleh** menyimpan kunci di database atau environment variable server, **KECUALI** satu API key gratis untuk mode tamu (lihat bagian 4).
+
+---
+
+## 🆓 4. MODE TAMU – MODEL GRATIS TANPA BYOK
+NJIRLAH AI **harus berfungsi tanpa pengguna memberikan API key**. Untuk itu:
+- Sediakan environment variable `OPENROUTER_FREE_API_KEY` yang berisi API key **gratis/terbatas** milik pengelola NJIRLAH.
+- API key ini hanya digunakan di sisi server, tidak dikirim ke klien.
+- Di mode tamu (tidak ada API key dari pengguna), aplikasi hanya bisa memanggil model‑model berikut ini melalui proxy. **Daftar model gratis hardcode ini harus muncul sebagai pilihan default**:
+
+```
+google/gemma-2-9b-it:free
+google/learnlm-1.5-pro-experimental:free
+meta-llama/llama-3.1-8b-instruct:free
+meta-llama/llama-3.1-70b-instruct:free
+meta-llama/llama-3.2-1b-instruct:free
+meta-llama/llama-3.2-3b-instruct:free
+mistralai/pixtral-12b:free
+mistralai/mistral-7b-instruct:free
+qwen/qwen-2-7b-instruct:free
+qwen/qwen-2.5-7b-instruct:free
+qwen/qwen-2.5-coder-32b-instruct:free
+nvidia/llama-3.1-nemotron-70b-instruct:free
+microsoft/phi-3-medium-128k-instruct:free
+microsoft/phi-3-mini-128k-instruct:free
+gryphe/mythomax-l2-13b:free
+openrouter/auto:free
+```
+
+- Saat pengguna belum memasukkan kunci OpenRouter, ModelSelector **hanya menampilkan model di atas** dan menyertakan badge “GRATIS”.
+- Saat pengguna memasukkan kunci, ModelSelector akan menampilkan **seluruh model dari OpenRouter** (fetch dinamis) + model gratis tetap tersedia.
+
+---
+
+## 🔑 5. MODE BYOK – SELURUH PROVIDER OPENROUTER DIDUKUNG
+Saat pengguna memberikan OpenRouter API key, NJIRLAH AI wajib:
+- Fetch daftar model dari `GET https://openrouter.ai/api/v1/models` dengan header `Authorization`.
+- Dari respons, ekstrak semua model. **Provider yang didukung harus mencakup 55 provider berikut** (tampilkan sebagai filter di UI):
+
+```
+AI21, AionLabs, AkashML, Alibaba Cloud Int., Amazon Bedrock, Anthropic, Arcee AI, AtlasCloud, Azure, Baidu Qianfan, Baseten, Cerebras, Chutes, Clarifai, Cohere, DeepInfra, DeepSeek, Featherless, Fireworks, Friendli, GMICloud, Google AI Studio, Google Vertex, Groq, Inception, Inceptron, Infermatic, Inflection, io.net, Liquid, Mancer, MiniMax, Mistral, Moonshot AI, Morph, Nebius Token Factory, NextBit, NovitaAI, OpenAI, OpenInference, Parasail, Perplexity, Phala, Reka AI, Relace, SambaNova, SiliconFlow, StepFun, Switchpoint, Together, Venice, Weights & Biases, xAI, Xiaomi, Z.ai
+```
+
+- Provider ini harus bisa dipilih sebagai filter di ModelSelector (multi‑select atau dropdown filter).
+- Tampilkan harga per token (prompt/completion) untuk model berbayar, label “GRATIS” untuk yang gratis.
+- Search teks harus mencari di nama model dan nama provider.
+- Semua model yang di‑fetch dari OpenRouter harus tersedia untuk chatting.
+
+---
+
+## ☁️ 6. CLOUDFLARE WORKERS AI (BYOK)
+- Memerlukan `CLOUDFLARE_ACCOUNT_ID` dan `CLOUDFLARE_API_TOKEN` dari pengguna.
+- Fetch daftar model text‑generation dari `GET https://api.cloudflare.com/client/v4/accounts/{ACCOUNT_ID}/ai/models?task=text-generation`.
+- Jika kunci belum ada, gunakan hardcoded daftar minimal 10 model terbaru (misal: llama-3.1-8b, mistral-7b, deepseek-r1, dll.) agar UI tidak kosong, dengan catatan “Masukkan kunci Cloudflare untuk melihat semua model”.
+- Proxy di `/api/cloudflare/chat`.
+
+---
+
+## 🎨 7. UI/UX – PREMIUM UNICORN.STUDIO STYLE
+### Tema
+- Warna: `neon-purple` #A855F7, `neon-cyan` #06B6D4, `neon-pink` #EC4899
+- Background: `bg-[#05050A]`
+- Glass: `backdrop-blur-2xl bg-white/5 border border-white/10`
+- Font: **Inter** (body), **Space Grotesk** (heading, branding)
+
+### Layout Wajib
+- **Background WebGL**: Embed Unicorn.Studio scene (sci‑fi unicorn, partikel neon) posisi fixed, z‑index 0, overlay gelap transparan agar konten terbaca.
+- **Sidebar kiri** (glass): Riwayat chat, tombol “New Chat”, pengaturan API key.
+- **Panel utama**: Header (model terpilih, provider badge, status streaming), chat area, input box bawah.
+- **Footer** (lihat bagian 9).
+
+### Komponen Premium
+1. **ApiKeyModal**: Two‑tab dialog (OpenRouter, Cloudflare), validasi koneksi langsung.
+2. **ModelSelector**: Combo box shadcn, avatar provider, search, filter provider, grup “Gratis”, “OpenRouter”, “Cloudflare”. Harus menampilkan **seluruh model**.
+3. **ChatBubble**: Animasi slide+fade, avatar unicorn, copy, regenerate, like/dislike, token usage.
+4. **TypingIndicator**: Tiga titik neon melompat.
+5. **Unicorn Easter Egg**: Klik logo 3x → animasi unicorn menari dengan Framer Motion.
+
+---
+
+## 👤 8. FOOTER – SEPENUH HATI OLEH ANDIKAA SAPUTRAA
+Footer wajib muncul di setiap halaman, dengan styling:
+```
+<footer className="mt-auto border-t border-white/10 bg-black/40 backdrop-blur-md py-6 text-center">
+  <p className="text-lg font-bold text-neon-pink flex items-center justify-center gap-2">
+    Dibuat dengan <AnimatedHeart /> oleh <span className="underline decoration-neon-purple">Andikaa Saputraa</span>
+  </p>
+  <p className="text-sm text-gray-400 mt-1">
+    Membangun masa depan AI yang bebas, tanpa batas, ala kadarnya tapi njir lah keren.
+  </p>
+</footer>
+```
+- Hati berdetak: animasi CSS scale infinite.
+- Tampilkan tahun dinamis.
+
+---
+
+## 📦 9. STRUKTUR PROYEK (WAJIB DIHASILKAN LENGKAP)
+- `app/layout.tsx`, `app/page.tsx`
+- `components/chat/`, `components/ui/`, `components/layout/`
+- `lib/encryption.ts`, `lib/openrouter.ts`, `lib/cloudflare.ts`
+- `store/chat-store.ts`, `store/api-key-store.ts`
+- `app/api/openrouter/chat/route.ts`
+- `app/api/cloudflare/chat/route.ts`
+- `tailwind.config.ts`, `next.config.ts`, `.env.example`
+
+---
+
+## 🧠 10. PERINTAH AKHIR
+**Bangun seluruh kode NJIRLAH AI sekaligus**, tanpa memotong penjelasan. Ikuti spesifikasi ini 100%. Pastikan:
+- Mode tamu berfungsi dengan model gratis.
+- BYOK mendukung seluruh 55 provider.
+- UI Unicorn.Studio dan footer Andikaa Saputraa terimplementasi sempurna.
+- Semua kode siap copy‑paste dan bisa langsung `npm run dev`.
+
+Mulai sekarang, generate kode lengkap NJIRLAH AI.
+```
+
+---
