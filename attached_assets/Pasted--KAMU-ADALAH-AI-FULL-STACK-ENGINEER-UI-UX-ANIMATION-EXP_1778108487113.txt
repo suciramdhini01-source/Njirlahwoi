@@ -1,0 +1,184 @@
+
+
+KAMU ADALAH AI FULL‑STACK ENGINEER & UI/UX ANIMATION EXPERT. TUGASMU MEMBANGUN APLIKASI **NJIRLAH AI** SECARA UTUH, 100% PRODUCTION‑READY. KAMU HARUS MENGIKUTI **SETIAP** SPESIFIKASI DI BAWAH INI DENGAN PRESISI TINGGI. TIDAK BOLEH MENYIMPANG, MENGURANGI, ATAU MENAMBAH DI LUAR INSTRUKSI. GAGAL BUKAN PILIHAN.
+
+---
+
+## 1. DESKRIPSI APLIKASI
+NJIRLAH AI adalah platform chat multi‑model AI dengan dua sumber:
+- **OpenRouter** → WAJIB BYOK (pengguna harus memasukkan API key miliknya sendiri, termasuk yang gratis). Tanpa key, pengguna tidak bisa mengakses model OpenRouter.
+- **Cloudflare Workers AI** → Token API disediakan server (bukan BYOK). Selalu bisa digunakan tanpa key tambahan.
+
+---
+
+## 2. TECH STACK (WAJIB, TIDAK BOLEH DIGANTI)
+- **Next.js 15** (App Router) + TypeScript **strict mode**
+- **Tailwind CSS 4** + custom theme (warna neon, glassmorphism)
+- **shadcn/ui** (semua komponen dasar wajib dari sini)
+- **Zustand** (state management)
+- **Web Crypto API** (enkripsi kunci OpenRouter di sisi klien)
+- **Library Animasi (WAJIB KOMBINASI)**:
+  - **Framer Motion** (animasi React, layout, gesture, AnimatePresence, drag)
+  - **GSAP** (animasi kompleks: scroll trigger, timeline, morph, 3D)
+  - **react-spring** (animasi berbasis fisika: parallax, follow pointer, spring halus)
+  - **react-transition-group** (mount/unmount transisi CSS)
+  - **anime.js** (path drawing, morph, efek khusus)
+- **Vercel** deployment
+
+---
+
+## 3. ARSITEKTUR BACKEND (PROXY)
+### Proxy OpenRouter (BYOK strict)
+- Endpoint: `POST /api/openrouter/chat`
+- Meneruskan header `x-api-key` dari request ke `https://openrouter.ai/api/v1/chat/completions` dengan header `Authorization: Bearer {key}`.
+- **WAJIB streaming (SSE)**. Gunakan `fetch` dan teruskan `ReadableStream` ke respons.
+- **TIDAK BOLEH menyimpan key di server**. Hanya proxy transparan.
+
+### Proxy Cloudflare (built‑in token server)
+- Endpoint: `POST /api/cloudflare/chat`
+- Gunakan environment variable `CLOUDFLARE_API_TOKEN` dan `CLOUDFLARE_ACCOUNT_ID`.
+- Panggil `https://api.cloudflare.com/client/v4/accounts/{ACCOUNT_ID}/ai/run/{model}` dengan format body Cloudflare Workers AI (`{ messages: [...] }`).
+- **WAJIB streaming** juga.
+
+---
+
+## 4. ENKRIPSI KUNCI OPENROUTER (CLIENT‑SIDE)
+- Simpan di **localStorage** dan **WAJIB terenkripsi** menggunakan **AES‑GCM** (Web Crypto API).
+- Kunci enkripsi diturunkan dari karakteristik unik browser (misal userAgent + screen resolution). **TIDAK BOLEH PLAIN TEXT**.
+- Jika enkripsi gagal, aplikasi harus menolak menyimpan key.
+
+---
+
+## 5. MODEL OPENROUTER (DINAMIS, BYOK)
+- Setelah pengguna memasukkan key, **fetch langsung dari** `GET https://openrouter.ai/api/v1/models` dengan header `Authorization`.
+- **Tampilkan SEMUA model** yang dikembalikan.
+- Sediakan **filter provider** untuk **55 provider** berikut (harus muncul semua):
+```
+AI21, AionLabs, AkashML, Alibaba Cloud Int., Amazon Bedrock, Anthropic, Arcee AI, AtlasCloud, Azure, Baidu Qianfan, Baseten, Cerebras, Chutes, Clarifai, Cohere, DeepInfra, DeepSeek, Featherless, Fireworks, Friendli, GMICloud, Google AI Studio, Google Vertex, Groq, Inception, Inceptron, Infermatic, Inflection, io.net, Liquid, Mancer, MiniMax, Mistral, Moonshot AI, Morph, Nebius Token Factory, NextBit, NovitaAI, OpenAI, OpenInference, Parasail, Perplexity, Phala, Reka AI, Relace, SambaNova, SiliconFlow, StepFun, Switchpoint, Together, Venice, Weights & Biases, xAI, Xiaomi, Z.ai
+```
+- Untuk model dengan biaya $0, beri badge **"GRATIS"**. Referensi model gratis (tapi tetap perlu key pengguna):
+```
+google/gemma-2-9b-it:free, google/learnlm-1.5-pro-experimental:free, meta-llama/llama-3.1-8b-instruct:free, meta-llama/llama-3.1-70b-instruct:free, meta-llama/llama-3.2-1b-instruct:free, meta-llama/llama-3.2-3b-instruct:free, mistralai/pixtral-12b:free, mistralai/mistral-7b-instruct:free, qwen/qwen-2-7b-instruct:free, qwen/qwen-2.5-7b-instruct:free, qwen/qwen-2.5-coder-32b-instruct:free, nvidia/llama-3.1-nemotron-70b-instruct:free, microsoft/phi-3-medium-128k-instruct:free, microsoft/phi-3-mini-128k-instruct:free, gryphe/mythomax-l2-13b:free, openrouter/auto:free
+```
+
+---
+
+## 6. MODEL CLOUDFLARE (SERVER‑SIDE FETCH)
+- Fetch daftar model text‑generation dari `GET https://api.cloudflare.com/client/v4/accounts/{ACCOUNT_ID}/ai/models?task=text-generation` menggunakan token server.
+- Tampilkan semua model yang dikembalikan dengan ikon "CF".
+- Jika fetch gagal, fallback ke daftar hardcode minimal 10 model (Llama 3, Mistral, DeepSeek, dll.) agar UI tidak kosong.
+
+---
+
+## 7. UI/UX – PREMIUM UNICORN.STUDIO STYLE
+### Tema Global
+- Warna: `neon-purple` (#A855F7), `neon-cyan` (#06B6D4), `neon-pink` (#EC4899)
+- Background base: `bg-[#05050A]`
+- Glassmorphism: `backdrop-blur-2xl bg-white/5 border border-white/10 shadow-2xl`
+- Tipografi: **Inter** (body), **Space Grotesk** (heading, branding)
+
+### Layout Wajib
+- **Background WebGL**: Embed scene dari **Unicorn.Studio** (script/iframe full‑screen fixed, z‑index 0) yang menampilkan unicorn futuristik, partikel neon, geometri sci‑fi. Overlay `bg-black/70 backdrop-blur-sm` agar konten tetap terbaca.
+- **Sidebar kiri** (glass, bisa collapse): Riwayat chat, tombol "New Chat", input OpenRouter key.
+- **Panel utama**: Header (model terpilih, badge provider, status streaming), chat area (scroll otomatis), input box bawah.
+- **Footer** (lihat bagian 8).
+
+### Komponen Premium
+1. **ApiKeyModal** – Dialog glass dua‑tab (OpenRouter/Cloudflare info), validasi koneksi langsung.
+2. **ModelSelector** – Combo box shadcn dengan search, filter multi‑provider, grup "Cloudflare" dan "OpenRouter", avatar provider, badge GRATIS/harga.
+3. **ChatBubble** – Animasi masuk, avatar unicorn, copy, regenerate, like/dislike, token usage.
+4. **TypingIndicator** – Tiga titik neon melompat.
+5. **Unicorn Easter Egg** – Klik logo "NJIRLAH AI" 3x → animasi unicorn menari pakai Framer Motion.
+
+---
+
+## 8. FOOTER – DIBUAT DENGAN SEPENUH HATI OLEH ANDIKAA SAPUTRAA
+Footer wajib muncul di setiap halaman, styling:
+```tsx
+<footer className="mt-auto border-t border-white/10 bg-black/40 backdrop-blur-md py-6 text-center">
+  <p className="text-lg font-bold text-neon-pink flex items-center justify-center gap-2">
+    Dibuat dengan <span className="animate-pulse text-red-500">❤️</span> oleh <span className="underline decoration-neon-purple">Andikaa Saputraa</span>
+  </p>
+  <p className="text-sm text-gray-400 mt-1">
+    Membangun masa depan AI yang bebas, tanpa batas, ala kadarnya tapi njir lah keren.
+  </p>
+  <p className="text-xs text-gray-500 mt-2">© {new Date().getFullYear()} NJIRLAH AI</p>
+</footer>
+```
+Hati berdetak: animasi CSS scale infinite.
+
+---
+
+## 9. FULL ANIMATION REQUIREMENTS (WAJIB SEMUA)
+**Gunakan kombinasi Framer Motion, GSAP, react-spring, react-transition-group, dan anime.js** untuk mengimplementasikan **semua animasi berikut** di seluruh aplikasi. Tidak boleh ada yang terlewat.
+
+1. **Spring physics** di semua transisi (tombol, modal, sidebar).
+2. **Drag** untuk sidebar (collapse/expand).
+3. **Enter/exit animation** pada setiap komponen mount/unmount (AnimatePresence, fade+slide).
+4. **Gesture** (tap/double‑tap) pada kartu model.
+5. **Stagger text appearance** di chat bubble (kata per kata muncul).
+6. **Keyframes & wildcards** untuk animasi loop: floating unicorn, glow pulse.
+7. **Rotate 360°** pada ikon refresh saat fetching.
+8. **Spinning 3D cube** sebagai loading screen.
+9. **AnimatePresence mode="wait"** pada pergantian chat.
+10. **Loading circle spinner** (neon).
+11. **Loading jumping dots** (AI typing indicator).
+12. **Loading ripple** saat klik tombol kirim.
+13. **Loading pulse dots** di header koneksi.
+14. **Follow pointer with spring** – efek glow mengikuti mouse.
+15. **Layout animation** – sidebar dengan shared layout.
+16. **Material Design ripple** di tombol dan list.
+17. **Motion along a path** – unicorn berjalan di footer.
+18. **Parallax** – background bergerak lambat dengan scroll (GSAP ScrollTrigger).
+19. **Path drawing** – garis neon mengelilingi logo saat hover.
+20. **Split text** – judul NJIRLAH AI muncul huruf per huruf.
+21. **Tilt card** – kartu model miring mengikuti mouse.
+22. **Accordion** – riwayat chat expand/collapse dengan animasi tinggi.
+23. **Fill text** – teks tombol "Send" terisi warna neon dari kiri ke kanan saat hover.
+24. **Loading progress bar** – di atas chat area saat streaming.
+25. **Scroll Direction: Hide Header** – header responsif terhadap scroll.
+26. **Cursor: Floating target** – custom cursor lingkaran kecil (spring).
+27. **Cursor trail** – partikel neon mengikuti kursor.
+28. **Cursor trail velocity** – panjang jejak sesuai kecepatan mouse.
+29. **Hold to confirm** – tombol "Hapus Chat" dengan progress melingkar 2 detik.
+30. **Image reveal slider** – efek reveal pada transisi panel.
+31. **Infinite loading** – indikator infinite scroll di dropdown model.
+32. **iOS slider** – temperature slider bergaya iOS (draggable + spring).
+33. **Magnetic filings** – chip provider saling tarik saat mouse dekat.
+34. **Multi‑state badge** – badge status (Online/Offline/Typing) dengan transisi.
+35. **iOS Notifications stack** – toast bertumpuk dengan animasi swipe.
+36. **Path morphing** – ikon send berubah menjadi checkmark (GSAP morphSVG).
+37. **Smooth tabs** – tab "Chat" / "Models" dengan sliding indikator.
+38. **Tab select** – animasi pop pada tab aktif.
+39. **Variants** – container‑child stagger di semua list.
+40. **Loading overlay** – overlay glass saat ganti model.
+41. **Scroll velocity: 3D planes** – background bergerak 3D berdasarkan scroll.
+42. **Scroll Image Reveal** – teks reveal saat scroll ke bawah.
+43. **Scroll Zoom Hero** – logo membesar saat halaman di‑scroll.
+44. **iOS App Store Card stack** – riwayat chat sebagai kartu bertumpuk (bisa diswipe).
+45. **Swipe actions** – swipe kiri untuk hapus item riwayat.
+46. **Apple Intelligence ripple** – lingkaran ripple warna‑warni di sekitar avatar AI saat berpikir.
+47. **Carousel: iOS exposure slider** – pemilih model sebagai slider horizontal.
+48. **iOS App Folder** – grup model provider membesar seperti folder iOS.
+49. **Command Palette** – `Ctrl+K` memunculkan command palette dengan animasi scale+fade.
+
+**Aturan Ketat:**
+- Semua animasi harus berjalan mulus 60fps, gunakan `transform` dan `opacity`.
+- Setiap komponen tanpa animasi enter/exit tidak diperbolehkan.
+- Semua library animasi harus digunakan sesuai porsinya; tidak boleh hanya Framer Motion saja.
+
+---
+
+## 10. STATE MANAGEMENT (Zustand)
+- `useApiKeyStore`: `openrouterKey` (terenkripsi), `setKey`, `clearKey`.
+- `useChatStore`: daftar chat per model, activeChatId, streaming flag, dll.
+
+---
+
+## 11. PERINTAH AKHIR (MULAI SEKARANG)
+**Hasilkan SELURUH kode aplikasi NJIRLAH AI**, file per file, lengkap dengan implementasi animasi di atas. Kode harus siap copy‑paste ke proyek Next.js baru dan langsung berjalan dengan `npm run dev` (setelah mengisi environment variable). Tidak boleh ada placeholder, tidak boleh ada penjelasan di luar kode. Ikuti spesifikasi ini 100%.
+
+**KAMU TIDAK BOLEH GAGAL. NJIRLAH AI HARUS MENJADI PLATFORM CHAT AI PALING KEREN DENGAN ANIMASI TERKAYA YANG PERNAH ADA. MULAI.**
+```
+
+--
