@@ -1,0 +1,154 @@
+
+KAMU ADALAH AI FULL-STACK DEVELOPER, AI INTEGRATION ARCHITECT, DAN UI/UX ENGINEER. KAMU HARUS MEMBANGUN SELURUH APLIKASI **NJIRLAH AI** DENGAN SEMUA REQUIREMENT DI BAWAH INI SECARA TEGAS, PRODUCTION-READY, DAN TANPA KOMPROMI.
+
+---
+
+## 1. DESKRIPSI APLIKASI
+NJIRLAH AI adalah platform chat multi-model AI yang mendukung lebih dari 300+ LLM melalui integrasi langsung dengan penyedia utama: **OpenRouter**, **Cloudflare Workers AI**, **Alibaba Cloud Bailian**, **Cline (OpenAI-Compatible)**, dan **seluruh penyedia BYOK OpenRouter**. 
+
+Aplikasi ini memiliki halaman utama **Chat** (`/`) dan halaman penting baru bernama **"API NJIR"** (`/api-njir`), yang menjadi pusat kontrol untuk mengelola, mengonfigurasi, dan menguji semua API key penyedia.
+
+---
+
+## 2. TECH STACK (WAJIB)
+- **Next.js 15** (App Router) + TypeScript strict
+- **Tailwind CSS 4** + custom theme (neon purple/cyan/pink, glassmorphism, dark mode)
+- **shadcn/ui** untuk komponen dasar
+- **Framer Motion**, **GSAP**, **react-spring**, **anime.js** (untuk animasi kaya dan UI premium)
+- **Zustand** untuk state management API key dan model
+- **Web Crypto API** untuk enkripsi semua API key di localStorage
+- **Vercel** untuk deployment
+
+---
+
+## 3. ARSITEKTUR BYOK & KONFIGURASI PENYEDIA
+Pengguna bisa menghubungkan berbagai penyedia LLM dengan API key miliknya. Semua kunci disimpan di **localStorage** terenkripsi (AES-GCM, passphrase unik browser + PIN opsional).
+
+### 3.1 OpenRouter (Gateway Utama)
+- Konfigurasi Dasar: Pengguna cukup memasukkan satu **OpenRouter API Key** (dari [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys)). Ini akan otomatis membuka akses ke 300+ model dari 60+ penyedia yang didukung.
+- **BYOK Providers**: OpenRouter mendukung "Bring Your Own Key" untuk penyedia-penyedia berikut. Di halaman "API NJIR", buat sub-bagian untuk mengelola kunci-kunci ini:
+    1. AI21
+    2. AionLabs
+    3. AkashML
+    4. Alibaba Cloud Int.
+    5. Amazon Bedrock
+    6. Anthropic
+    7. Arcee AI
+    8. AtlasCloud
+    9. Azure
+    10. Baidu Qianfan
+    11. Baseten
+    12. Cerebras
+    13. Chutes
+    14. Clarifai
+    15. **Cloudflare**
+    16. Cohere
+    17. DeepInfra
+    18. DeepSeek
+    19. Featherless
+    20. Fireworks
+    21. Friendli
+    22. GMICloud
+    23. Google AI Studio
+    24. Google Vertex
+    25. Groq
+    26. Inception
+    27. Inceptron
+    28. Infermatic
+    29. Inflection
+    30. io.net
+    31. Liquid
+    32. Mancer
+    33. MiniMax
+    34. Mistral
+    35. Moonshot AI
+    36. Morph
+    37. Nebius Token Factory
+    38. NextBit
+    39. NovitaAI
+    40. OpenAI
+    41. OpenInference
+    42. Parasail
+    43. Perplexity
+    44. Phala
+    45. Reka AI
+    46. Relace
+    47. SambaNova
+    48. SiliconFlow
+    49. StepFun
+    50. Switchpoint
+    51. Together
+    52. Venice
+    53. Weights & Biases
+    54. xAI
+    55. Xiaomi
+    56. Z.ai
+
+### 3.2 Cloudflare Workers AI (Langsung)
+- Pengguna memasukkan **Cloudflare Account ID** dan **Cloudflare API Token**.
+- Cara mendapatkannya: [Panduan Resmi Cloudflare](https://developers.cloudflare.com/workers-ai/get-started/rest-api/). Token didapat dari dashboard Cloudflare > Workers AI > Use REST API > Create API Token.
+- Model yang tersedia: @cf/meta/llama-3.1-8b, @cf/mistral/mistral-7b, @cf/deepseek/deepseek-r1, dan lain-lain (di-fetch otomatis dari API).
+
+### 3.3 Alibaba Cloud Bailian (Langsung)
+- Pengguna memasukkan **Bailian API Key**.
+- Cara mendapatkannya: [Panduan Resmi Alibaba Cloud](https://developer.aliyun.com/article/1697678). Masuk ke [Konsol Bailian](https://bailian.console.aliyun.com/), buka API Key Center, buat kunci baru.
+- Model utama: Qwen-Turbo, Qwen-Plus, Qwen-Max, Llama-3, DeepSeek-V3/R1, dll.
+
+### 3.4 Cline (OpenAI-Compatible Provider)
+- Pengguna bisa menambahkan endpoint pihak ketiga yang kompatibel. Masukkan:
+  - **Nama Provider**: Bebas (contoh: "Cline Local", "SiliconFlow", "RouterPark", dll.)
+  - **Base URL**: Endpoint yang kompatibel dengan API OpenAI, contoh:
+    - `https://api.siliconflow.cn/v1`
+    - `http://localhost:11434/v1` (untuk Ollama lokal)
+  - **API Key**: Kunci autentikasinya.
+  - **Model ID**: Nama model spesifik (contoh: `meta/llama-3.1-8b-instruct`)
+- Ini memungkinkan integrasi dengan 100+ model dari 20+ penyedia tambahan yang tidak ada di daftar utama.
+
+---
+
+## 4. HALAMAN "API NJIR" (`/api-njir`)
+Ini adalah halaman kustom yang WAJIB dibangun sebagai pusat pengelolaan kunci API. Konsepnya adalah "Dashboard Untuk Semua Kunci Anda".
+
+### 4.1 Desain & Layout
+- **Header**: Judul "API NJIR" dengan sub-judul "Kendalikan Semua Kunci API di Satu Tempat".
+- **Tata Letak**: Gunakan sistem grid atau tab.
+  - **Tab 1: OpenRouter** -> Input API Key utama + sub-grid untuk 56 BYOK providers.
+  - **Tab 2: Cloudflare** -> Input Account ID & Token.
+  - **Tab 3: Alibaba Bailian** -> Input API Key.
+  - **Tab 4: Custom (Cline)** -> Form dinamis untuk menambah endpoint khusus.
+
+### 4.2 Komponen Fungsional Wajib
+- **Input Field**: Desain glassmorphism, dengan ikon gembok. Ada tombol "Test Connection" yang akan mem-ping endpoint sederhana untuk validasi.
+- **Status Indicator**: Lampu hijau/merah untuk menunjukkan apakah kunci valid atau tidak.
+- **Encrypt & Save**: Setiap kali kunci disimpan, enkripsi dan simpan ke localStorage.
+- **Daftar Model**: Di bawah setiap input penyedia, tampilkan badge model-model yang tersedia. Untuk OpenRouter, fetch dan tampilkan 300+ model yang bisa diakses.
+
+### 4.3 Fitur "Tambah Custom Provider"
+- Pengguna bisa menekan tombol "Add Custom Provider".
+- Akan muncul modal/form untuk mengisi: Nama Provider, API Base URL, API Key, dan Model ID.
+- Data ini disimpan terenkripsi dan akan muncul di daftar penyedia yang bisa dipilih saat chatting.
+
+---
+
+## 5. HUBUNGAN DENGAN CHAT PAGE (`/`)
+Di halaman utama chat, pada **Model Selector**, tampilkan semua model dari semua penyedia yang sudah dikonfigurasi di "API NJIR". 
+- **Sumber Model**: OpenRouter (dengan 300+ model), Cloudflare, Bailian, dan Custom.
+- **Filter**: Berdasarkan penyedia (OpenAI, Google, Anthropic, dll.) atau berdasarkan tipe (Chat, Image, Code).
+
+---
+
+## 6. DELIVERABLES (SEMUA FILE HARUS DIHASILKAN)
+1. **app/api-njir/page.tsx** - Halaman "API NJIR".
+2. **components/api-njir/ProviderCard.tsx** - Untuk setiap penyedia.
+3. **components/api-njir/CustomProviderForm.tsx** - Modal untuk menambah custom provider.
+4. **store/all-api-keys-store.ts** - Zustand store untuk menyimpan semua kunci (OpenRouter, Cloudflare, Bailian, Custom List).
+5. **lib/encryption.ts** - Enkripsi/dekripsi kunci.
+6. **Update ModelSelector** - Untuk membaca store dan menampilkan semua model.
+
+---
+
+## 7. PERINTAH AKHIR
+**BANGUN SELURUH KODE LENGKAP, FILE PER FILE, SIAP COPY-PASTE.** Pastikan semua API key terenkripsi di client, semua proxy di backend berfungsi untuk streaming, dan UI/UX-nya animatif serta premium. Sertakan footer "Dibuat dengan sepenuh hati oleh Andikaa Saputraa". Gagal bukan pilihan.
+```
+
+---

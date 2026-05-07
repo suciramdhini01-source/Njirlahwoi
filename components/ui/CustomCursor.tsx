@@ -32,7 +32,7 @@ export default function CustomCursor() {
       velRef.current = { vx, vy, prevX: e.clientX, prevY: e.clientY };
 
       setPos({ x: e.clientX, y: e.clientY });
-      api.start({ x: e.clientX - 6, y: e.clientY - 6 });
+      api.start({ x: e.clientX, y: e.clientY });
 
       const speed = Math.sqrt(vx * vx + vy * vy);
       const count = Math.min(Math.floor(speed / 3), 4);

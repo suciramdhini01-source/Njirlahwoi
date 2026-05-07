@@ -2,7 +2,8 @@
 
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
-import { Plus, MessageSquare, Key, ChevronLeft, ChevronRight, Sparkles, Search } from 'lucide-react';
+import { Plus, MessageSquare, Key, ChevronLeft, ChevronRight, Sparkles, Search, Settings2 } from 'lucide-react';
+import Link from 'next/link';
 import { useChatStore } from '@/store/chat-store';
 import { useApiKeyStore } from '@/store/api-key-store';
 import HoldToDelete from '@/components/ui/HoldToDelete';
@@ -230,8 +231,37 @@ export default function Sidebar({ onOpenApiKey }: SidebarProps) {
         )}
       </div>
 
-      {/* ── API Keys ── */}
-      <div className="p-2 border-t border-white/10">
+      {/* ── Bottom actions ── */}
+      <div className="p-2 border-t border-white/10 space-y-1">
+        {/* API NJIR link */}
+        <Link href="/api-njir" className="block">
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.96 }}
+            className={`w-full flex items-center gap-2 py-2.5 px-3 rounded-xl text-gray-500 hover:text-neon-cyan hover:bg-neon-cyan/5 border border-transparent hover:border-neon-cyan/15 transition-all cursor-pointer ${
+              collapsed ? 'justify-center' : ''
+            }`}
+          >
+            <Settings2 size={14} className="flex-shrink-0" />
+            <AnimatePresence>
+              {!collapsed && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex items-center gap-1.5 text-xs overflow-hidden"
+                >
+                  <span className="whitespace-nowrap">API NJIR</span>
+                  <span className="px-1 py-0.5 bg-neon-cyan/10 border border-neon-cyan/20 rounded text-[8px] text-neon-cyan font-bold">
+                    NEW
+                  </span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </Link>
+
+        {/* API Keys button */}
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.96 }}
