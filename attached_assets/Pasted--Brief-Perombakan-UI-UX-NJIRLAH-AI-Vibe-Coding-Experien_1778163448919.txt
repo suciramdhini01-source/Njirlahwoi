@@ -1,0 +1,85 @@
+# Brief Perombakan UI/UX NJIRLAH AI — "Vibe Coding" Experience
+
+**Peran:** Senior UI/UX Engineer & Frontend Architect  
+**Tujuan:** Mentransformasi NJIRLAH AI menjadi platform premium, intuitif, solid, dan menyenangkan, secara khusus mendukung alur kerja *"vibe coding"*: efisiensi penulisan kode, kemudahan debugging, visualisasi kode yang jernih, dan navigasi konteks yang mulus.  
+**Prioritas Pengerjaan:** 1) Dashboard API NJIR, 2) Chat Input & Bubble + Header Panel Chat, 3) Sidebar & Model Selector, 4) Mikrointeraksi & Responsif.  
+**Tech Stack Wajib:** Next.js (App Router), React 18+, Tailwind CSS, Zustand, Framer Motion, Lucide Icons, canvas-confetti.  
+
+## 🎨 Tema & Palet Warna (Revisi Total)
+Gunakan palet **brand baru** yang vibrant dengan dominasi hitam pekat sebagai fondasi.
+
+| Peran Warna              | Kode Warna (Hex) | Deskripsi                                  |
+|--------------------------|------------------|--------------------------------------------|
+| Latar Utama              | `#05050A`        | Hitam sangat gelap (main bg)               |
+| Latar Panel & Kartu      | `#0A0A14`        | Hitam kebiruan sangat gelap                |
+| Glassmorphism            | `bg-white/5 backdrop-blur-2xl border-white/10` | Efek kaca tembus pandang |
+| **Aksen Merah**          | `#FF3B30`        | Untuk error, like, aksi berbahaya          |
+| **Aksen Hijau**          | `#34C759`        | Sukses, status aktif, tombol utama         |
+| **Aksen Biru Muda**      | `#5AC8FA`        | Informasi, tautan, streaming indicator     |
+| **Aksen Hijau Telur Asin** (Pistachio) | `#A9D171` | Netral ramah, badge, elemen sekunder |
+| **Aksen Amber**          | `#FF9500`        | Peringatan, favorit, highlight penting     |
+| **Hitam Tambahan**       | `#111118`, `#16161F`, `#1C1C26` | Gradasi panel bertingkat, border, skeleton |
+
+**Aturan ketat:**  
+- Setiap aksen hanya digunakan sesuai peran di atas.  
+- Semua teks body menggunakan `text-white/80`, heading `text-white`.  
+- Interaksi hover/aktif menggunakan versi lebih terang/transparan dari aksen terkait.  
+
+## ✨ Animasi Latar “Aura Bergeser” (Wajib)
+Terapkan efek latar belakang halaman yang **berubah warna secara kontinu**:
+- Gradien radial besar di belakang seluruh konten (z-index -10).
+- Warna berganti setiap **10 detik** dengan transisi **fade horizontal** (`transition-all duration-1000 ease-in-out`), berpindah dari kiri ke kanan.
+- Urutan siklus warna gradien:  
+  `radial-gradient(at 0% 50%, #FF3B3020, transparent 70%)` →  
+  `radial-gradient(at 30% 50%, #34C75920, transparent 70%)` →  
+  `radial-gradient(at 60% 50%, #5AC8FA20, transparent 70%)` →  
+  `radial-gradient(at 90% 50%, #A9D17120, transparent 70%)` →  
+  `radial-gradient(at 100% 50%, #FF950020, transparent 70%)`.  
+- Animasi menggunakan CSS `@keyframes shiftingGlow` yang menggeser posisi radial gradient secara halus.  
+- Implementasi melalui pseudo-element `::before` pada `body` dengan opacity rendah, tidak mengganggu konten.
+
+---
+
+## 📐 Spesifikasi Komponen (Disesuaikan Palet Baru)
+
+### A. Perubahan Struktural
+**Header Panel Chat**  
+- Judul dinamis, tombol Pin (amber saat aktif), Favorite (hijau telur asin).  
+- Animasi klik: *scale bounce* + partikel aksen kecil (merah untuk pin, amber untuk fav).  
+
+**Sidebar**  
+- Seksi "Pinned" (amber) dan "Favorites" (hijau telur asin).  
+- Drag-and-drop Framer Motion. Judul auto-generate animasi typing warna biru muda.  
+- Empty state: unicorn line art neon hijau telur asin, tombol "Chat Baru" dengan aksen hijau.
+
+**Dashboard API NJIR**  
+- Kartu penyedia: status lingkaran berdenyut (hijau/merah), latensi (hijau <200ms, amber <500ms, merah >500ms).  
+- Grafik batang perbandingan latensi: batang berwarna merah, hijau, biru muda, hijau telur asin, amber.  
+- Empty state: ilustrasi kunci hilang warna amber, tombol "Tambah Penyedia" hijau.
+
+### B. Komponen Utama
+**Chat Input**  
+- Tombol lampiran (biru muda), tombol kirim morphing ke centang hijau.  
+- Attachment preview dengan badge tipe file berwarna hijau telur asin.  
+
+**Chat Bubble**  
+- Hover actions: Copy (hijau telur asin), Regenerate (biru muda), Like (hijau), Dislike (merah).  
+- Error bubble: latar merah gelap, tombol "Coba Lagi" (amber), "Periksa Kunci API" (biru muda).  
+
+**Model Selector**  
+- Badge tipe: Chat (biru muda), Image (hijau telur asin), Code (amber).  
+- Rating bintang (amber), tautan docs (biru muda).
+
+### C. Mikrointeraksi & Animasi
+- Skeleton shimmer dengan base abu-abu gelap `#1C1C26` dan aksen transparan.  
+- Progress bar streaming: warna biru muda setinggi 2px.  
+- Toast notifikasi: latar kaca, ikon aksen sesuai jenis (sukses=hijau, error=merah).  
+- Confetti sukses: partikel merah, hijau, biru muda, hijau telur asin, amber.  
+- Tombol scroll bawah: pil glassmorphism dengan border amber.
+
+### D. Responsif & Mobile
+- Sidebar overlay hitam pekat dengan backdrop blur.  
+- Tombol hamburger berwarna biru muda.
+
+---
+

@@ -1,0 +1,120 @@
+## 1a) Updated prompt (versi diperjelas & dipadatkan)
+
+Kamu adalah **Senior UI/UX Engineer** sekaligus **Frontend Architect**. Tugasmu adalah merancang **major UI/UX overhaul** untuk aplikasi **NJIRLAH AI** agar terasa **premium, intuitif, solid, dan menyenangkan** setara aplikasi kelas dunia—tanpa mengubah perilaku backend (perubahan hanya UI/UX + integrasi state/store).
+
+### Prinsip utama (3 pilar)
+1. **UX Intuitif**: alur kerja jelas, minim friksi, affordance kuat.
+2. **UI Premium**: dark mode mendalam, glassmorphism, animasi halus, tipografi rapi, aksen neon.
+3. **Platform Solid**: dashboard untuk manajemen API key, health/status, dan full responsive.
+
+---
+
+## A. Perubahan struktural halaman
+
+### A1) Contextual Chat Header
+- Header menampilkan **judul chat aktif** (bukan label statis).
+- Jika belum ada judul: tampilkan **“Chat Baru”** + ikon edit (rename inline/modal).
+- Aksi kanan: **Pin**, **Favorite**, dan menu **⋯** (rename, hapus, ekspor).
+- Transisi saat pindah chat: judul **fade + slide dari atas**.
+
+### A2) Sidebar ditingkatkan
+- Seksi **Pinned** dan **Favorites** di bagian atas, dengan divider.
+- Item pinned/favorite lebih ringkas dan **drag & reorder**.
+- **Auto-generated title**: setelah pesan pertama, panggil `/api/generate-title` untuk judul 3–5 kata; tampilkan di sidebar dengan animasi typing halus.
+- **Empty state**: ilustrasi unicorn kecil + teks “Mulai percakapan pertamamu” + tombol “Chat Baru” kontras.
+- **Collapse/Expand**: sidebar bisa di-drag lebarnya (Framer Motion drag). Saat collapsed: hanya ikon.
+
+### A3) Halaman “API NJIR” jadi dashboard visual (bukan form datar)
+- Layout: **grid cards** per provider (OpenRouter, Cloudflare, Alibaba, Custom), tiap kartu memuat:
+  - Nama & logo provider
+  - Status koneksi terakhir (indikator hijau/merah berdenyut)
+  - Latensi rata-rata (diukur saat test connection)
+  - Jumlah model tersedia
+  - Tombol **Kelola** → buka modal konfigurasi
+- Bagian atas: **mini bar chart** perbandingan latensi antar provider (CSS animasi atau library ringan).
+- Empty state: kartu kosong + ikon kunci + “Belum ada penyedia terhubung” + CTA “Tambah Penyedia Pertama”.
+- Tooltip bantuan di setiap field input, termasuk link sumber key (mis. OpenRouter keys URL).
+
+---
+
+## B. Penyempurnaan komponen utama
+
+### B1) Chat Input & Attachments
+- **Smart attachments**: upload gambar/PDF/kode → tampil chip preview (nama, ikon, hapus). File otomatis masuk konteks AI.
+- Input lebih kaya: tombol lampiran (kiri), tombol kirim (kanan) dengan animasi morph jadi checkmark saat terkirim.
+- Placeholder dinamis sesuai konteks (mis. normal vs ada lampiran).
+
+### B2) Chat bubble & pesan
+- Pada hover bubble AI: tombol **Regenerate** + **Copy** + tooltip.
+- **Like/Dislike** di bawah bubble AI; klik → animasi pop singkat; simpan di state lokal (tanpa kirim server).
+- **Error bubble**: merah transparan + ikon warning + pesan ramah + CTA “Coba Lagi” / “Periksa Kunci API”.
+
+### B3) Model selector lebih kuat
+- Search teks realtime.
+- Filter: Provider (OpenAI/Anthropic/dll), Tipe (chat/image/code), Status (gratis/berbayar).
+- Model item berupa **card**: ikon provider, nama model, badge GRATIS, harga/token kecil.
+- Toggle tampilan **list ↔ grid**.
+
+---
+
+## C. Animasi & mikrointeraksi (wajib)
+- Skeleton loading shimmer untuk model list / chat history.
+- Skeleton bubble saat menunggu respons AI pertama.
+- Toast notifikasi muncul dari kanan atas dengan spring/bounce ringan.
+- Hover scale 1.02x untuk semua kartu (0.2s).
+- Progress bar neon cyan tipis di bawah chat header saat streaming.
+- Auto-scroll cerdas: auto scroll saat streaming kecuali user scroll ke atas; bila user di atas → tampil tombol “Scroll ke bawah” mengambang.
+- Confetti setelah agent selesai generate proyek (canvas-confetti).
+
+---
+
+## D. Responsive & mobile
+- <768px: sidebar jadi overlay dengan hamburger; animasi slide dari kiri.
+- Chat full width; header lebih ringkas.
+- Input chat fixed di bawah, aman terhadap keyboard mobile (safe-area padding).
+
+---
+
+## E. Konsistensi tema
+- Background utama: `bg-[#05050A]`
+- Panel: `bg-[#0a0a14]`
+- Glass: `backdrop-blur-2xl bg-white/5 border-white/10`
+- Neon accent: Purple `#A855F7`, Cyan `#06B6D4`, Pink `#EC4899`
+- Font: Inter (body), Space Grotesk (heading)
+- Icon: Lucide Icons (shadcn/ui)
+
+---
+
+## F. Aturan implementasi
+1. Audit semua komponen terkait dan update sesuai spesifikasi.
+2. Buat komponen baru bila perlu: Skeleton, PinSection, DashboardCard, Tooltip, AttachmentPreview, dll.
+3. Integrasikan state via **Zustand** untuk: auto-title, pin/favorite, status koneksi provider dashboard.
+4. Jangan ubah backend; jaga kontrak API yang ada.
+5. Footer “Andikaa Saputraa” **harus tetap** di semua halaman.
+
+---
+
+### Output yang harus kamu berikan (format wajib)
+1. **Ringkasan perubahan** (bullet list, high-level).
+2. **Information Architecture & user flow** (singkat).
+3. **Daftar komponen** (baru vs refactor) + tanggung jawabnya.
+4. **State model Zustand** (store slices, events/actions, contoh shape state).
+5. **Rencana implementasi bertahap** (milestones) + risiko & mitigasi.
+6. **Acceptance criteria** (ceklist yang bisa diuji).
+7. (Opsional) Potongan kode contoh untuk 2–3 komponen kritikal (tanpa mengunci framework kalau belum dikonfirmasi).
+
+---
+
+## 1b) Inquiries (biar tidak mendesain di ruang hampa)
+1. Stack saat ini apa: **Next.js/React**, Tailwind, shadcn/ui, Framer Motion, Zustand—semuanya sudah dipakai atau ini harapan saja?
+2. Struktur routing & halaman yang ada apa saja (Chat, Agent, API NJIR, dll.)? Ada repo/struktur folder singkat?
+3. Format data chat: ada **chatId, messages, pinned, favorite, title** di backend atau semua harus lokal?
+4. Endpoint yang tersedia selain `/api/generate-title` apa? Ada endpoint untuk **export chat**, **pin/favorite** (server) atau wajib lokal?
+5. “Streaming respons” pakai apa (SSE, websockets, fetch stream)? Ini memengaruhi progress bar + auto-scroll.
+6. Attachment: file disimpan di mana (client-only, server upload, S3)? Jenis file yang benar-benar didukung?
+7. Model list berasal dari endpoint mana, dan payload-nya memuat apa (provider, pricing, free/paid flag)?
+8. Target perangkat: mayoritas desktop atau mobile? Ada requirement aksesibilitas (WCAG), keyboard navigation, i18n?
+9. Batasan desain: brand guideline/logo sudah ada, atau saya bebas “meng-neon-kan” semuanya?
+10. Tolong sebutkan 2–3 masalah UX paling menyakitkan saat ini (yang bikin pengguna mengumpat halus).
+
+Balas pertanyaan-pertanyaan di atas (yang kamu bisa), nanti saya revisi prompt ini lagi sampai kamu bilang selesai. Karena tentu saja kita ingin hasilnya rapi—bukan sekadar “kelihatan keren” doang.
