@@ -4,10 +4,10 @@ import Link from 'next/link';
 import { ArrowRight, Zap, Shield, Globe, ChevronRight, Star, TrendingUp, Users } from 'lucide-react';
 
 const STATS = [
-  { value: '400+', label: 'Models available' },
-  { value: '55+', label: 'AI providers' },
-  { value: '1M+', label: 'Developers' },
-  { value: '$0', label: 'To start' },
+  { value: '400+', label: 'Model tersedia' },
+  { value: '55+', label: 'AI provider' },
+  { value: '100%', label: 'BYOK — kunci milikmu' },
+  { value: 'Gratis', label: 'Untuk memulai' },
 ];
 
 const PROVIDER_LOGOS = [
@@ -24,29 +24,29 @@ const PROVIDER_LOGOS = [
 const FEATURES = [
   {
     icon: <Globe className="w-5 h-5" />,
-    title: 'Unified API',
-    description: 'Access every major AI provider through a single, OpenAI-compatible API endpoint. No more juggling multiple SDKs.',
+    title: 'Satu Antarmuka',
+    description: 'Akses semua provider AI besar lewat satu platform yang seragam. Tidak perlu ganti-ganti SDK atau API key.',
     color: 'text-blue-600',
     bg: 'bg-blue-50',
   },
   {
     icon: <Zap className="w-5 h-5" />,
-    title: 'Automatic Fallbacks',
-    description: 'Route requests to the best available provider. If one fails, another takes over automatically without downtime.',
+    title: 'BYOK — Kunci Milikmu',
+    description: 'Bawa API key milikmu sendiri. Data tidak pernah disimpan di server. Privasi terjaga 100%.',
     color: 'text-amber-600',
     bg: 'bg-amber-50',
   },
   {
     icon: <Shield className="w-5 h-5" />,
-    title: 'Cost Optimization',
-    description: 'Compare real-time pricing across providers and route to the cheapest option that meets your quality requirements.',
+    title: 'Enkripsi Client-Side',
+    description: 'Kunci API dienkripsi langsung di browser menggunakan Web Crypto API. Server tidak pernah melihat key kamu.',
     color: 'text-green-600',
     bg: 'bg-green-50',
   },
   {
     icon: <TrendingUp className="w-5 h-5" />,
-    title: 'Performance Analytics',
-    description: 'Detailed token usage, latency tracking, and cost breakdowns. Understand exactly what your AI is spending.',
+    title: 'Agent Code Builder',
+    description: 'Bangun proyek web lengkap dengan AI. Kode dihasilkan streaming, langsung bisa dipreview di browser.',
     color: 'text-rose-600',
     bg: 'bg-rose-50',
   },
@@ -57,21 +57,21 @@ const FEATURED_MODELS = [
     id: 'anthropic/claude-3.5-sonnet',
     name: 'Claude 3.5 Sonnet',
     provider: 'Anthropic',
-    description: 'Fast, capable model for complex reasoning and coding tasks with a 200K context window.',
+    providerColor: '#c96442',
+    description: 'Model terkuat Anthropic untuk reasoning dan coding dengan 200K context.',
     context: '200K',
-    inputPrice: '$3/M',
-    outputPrice: '$15/M',
-    badge: 'Popular',
+    inputPriceLabel: '$3/M',
+    badge: 'Populer',
     badgeColor: 'bg-blue-100 text-blue-700',
   },
   {
     id: 'openai/gpt-4o',
     name: 'GPT-4o',
     provider: 'OpenAI',
-    description: 'OpenAI flagship multimodal model with vision, audio, and advanced reasoning capabilities.',
+    providerColor: '#10a37f',
+    description: 'Model multimodal flagship OpenAI dengan kemampuan vision dan audio.',
     context: '128K',
-    inputPrice: '$5/M',
-    outputPrice: '$15/M',
+    inputPriceLabel: '$5/M',
     badge: 'Multimodal',
     badgeColor: 'bg-green-100 text-green-700',
   },
@@ -79,53 +79,53 @@ const FEATURED_MODELS = [
     id: 'google/gemini-1.5-pro',
     name: 'Gemini 1.5 Pro',
     provider: 'Google',
-    description: 'Google\'s most capable model with a 1 million token context window for long documents.',
+    providerColor: '#4285f4',
+    description: 'Model Google dengan context window 1 juta token untuk dokumen panjang.',
     context: '1M',
-    inputPrice: '$3.5/M',
-    outputPrice: '$10.5/M',
-    badge: 'Long Context',
+    inputPriceLabel: '$3.5/M',
+    badge: 'Context Panjang',
     badgeColor: 'bg-amber-100 text-amber-700',
   },
   {
     id: 'meta-llama/llama-3.1-70b-instruct',
     name: 'Llama 3.1 70B',
     provider: 'Meta',
-    description: 'Meta\'s open-source flagship model available through multiple high-performance providers.',
+    providerColor: '#0866ff',
+    description: 'Model open-source terkuat Meta, tersedia gratis via berbagai provider.',
     context: '128K',
-    inputPrice: '$0.35/M',
-    outputPrice: '$0.40/M',
+    inputPriceLabel: '$0.35/M',
     badge: 'Open Source',
     badgeColor: 'bg-purple-100 text-purple-700',
   },
 ];
 
 const FREE_MODELS = [
-  { name: 'Llama 3.1 8B (free)', provider: 'Meta · via various' },
-  { name: 'Gemma 2 9B (free)', provider: 'Google · via various' },
-  { name: 'Mistral 7B (free)', provider: 'Mistral · via various' },
-  { name: 'Phi-3 Mini (free)', provider: 'Microsoft · via various' },
+  'Llama 3.1 8B (gratis)',
+  'Gemma 2 9B (gratis)',
+  'Mistral 7B (gratis)',
+  'Phi-3 Mini (gratis)',
 ];
 
 const ANNOUNCEMENTS = [
   {
-    date: 'May 2026',
-    title: 'Gemini 2.0 Flash now available with 1M context',
-    description: 'Google\'s latest flash model brings significant speed improvements and expanded context.',
-    tag: 'New Model',
+    date: 'Mei 2026',
+    title: 'DeepSeek R1 kini tersedia dengan performa setara o1',
+    description: 'Model reasoning terbaru DeepSeek menandingi GPT-o1 di berbagai benchmark coding.',
+    tag: 'Model Baru',
     tagColor: 'bg-blue-100 text-blue-700',
   },
   {
     date: 'Apr 2026',
-    title: 'DeepSeek R2 achieves top scores on coding benchmarks',
-    description: 'The latest reasoning model from DeepSeek surpasses GPT-4 on several coding tasks.',
-    tag: 'Benchmark',
+    title: 'Enkripsi AES-GCM kini lebih kuat dengan PIN 6 digit',
+    description: 'Update keamanan: kunci API kamu kini dilindungi enkripsi berlapis di sisi klien.',
+    tag: 'Keamanan',
     tagColor: 'bg-green-100 text-green-700',
   },
   {
     date: 'Apr 2026',
-    title: 'Automatic provider fallback now supports 40+ providers',
-    description: 'Improved routing logic ensures your requests always find the fastest available provider.',
-    tag: 'Feature',
+    title: 'Agent Code Builder kini support download ZIP proyek',
+    description: 'Setelah agent selesai generate, unduh seluruh proyek dalam satu file ZIP.',
+    tag: 'Fitur Baru',
     tagColor: 'bg-amber-100 text-amber-700',
   },
 ];
@@ -133,22 +133,22 @@ const ANNOUNCEMENTS = [
 const STEPS = [
   {
     step: '1',
-    title: 'Create a free account',
-    description: 'Sign up with your email or GitHub. No credit card required to get started with free models.',
+    title: 'Daftar akun gratis',
+    description: 'Buat akun dengan email kamu. Tidak perlu kartu kredit. Langsung akses model gratis.',
   },
   {
     step: '2',
-    title: 'Get your API key',
-    description: 'Generate an API key in your dashboard. Use it anywhere you\'d use an OpenAI API key.',
+    title: 'Masukkan API key',
+    description: 'Bawa key OpenRouter atau Cloudflare Workers AI milikmu. Disimpan terenkripsi di browser.',
   },
   {
     step: '3',
-    title: 'Start building',
-    description: 'Point your existing app at OpenRouter. Access any model with one consistent interface.',
+    title: 'Mulai chat & build',
+    description: 'Pilih model, mulai ngobrol, atau gunakan Agent Builder untuk membangun aplikasi web.',
   },
 ];
 
-export default function OpenRouterHomePage() {
+export default function HomePage() {
   return (
     <div className="pt-14">
       {/* Hero */}
@@ -158,28 +158,28 @@ export default function OpenRouterHomePage() {
           <div className="max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#6467F2]/10 text-[#6467F2] text-xs font-medium mb-6">
               <Star className="w-3 h-3" />
-              The unified AI gateway
+              Platform AI multi-model bebas batasan
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight tracking-tight mb-6">
-              Every AI model,{' '}
-              <span className="text-[#6467F2]">one API</span>
+              Semua AI model,{' '}
+              <span className="text-[#6467F2]">satu platform</span>
             </h1>
             <p className="text-lg text-gray-500 leading-relaxed mb-8 max-w-xl mx-auto">
-              Access hundreds of language models from the world's leading AI providers through a single, unified API. Compare, switch, and scale with zero lock-in.
+              Akses ratusan model AI dari semua provider terkemuka. BYOK — bawa kunci API milikmu sendiri. Tidak ada lock-in, tidak ada biaya tersembunyi.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
-                href="#"
+                href="/chat"
                 className="px-5 py-2.5 text-sm font-medium text-white bg-[#6467F2] hover:bg-[#5558e8] rounded-full transition-colors duration-150 flex items-center gap-2"
               >
-                Get started for free
+                Mulai chat sekarang
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
-                href="/openrouter/models"
+                href="/models"
                 className="px-5 py-2.5 text-sm font-medium text-gray-700 border border-gray-200 hover:border-gray-300 hover:bg-gray-50 rounded-full transition-colors duration-150 flex items-center gap-2"
               >
-                Browse models
+                Jelajahi model
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
@@ -196,28 +196,23 @@ export default function OpenRouterHomePage() {
           </div>
         </div>
 
-        {/* Provider logos strip */}
+        {/* Provider strip */}
         <div className="border-t border-gray-100 bg-gray-50/50">
           <div className="max-w-7xl mx-auto px-4 py-6">
             <p className="text-center text-xs text-gray-400 uppercase tracking-wider mb-5 font-medium">
-              Powered by the world's leading AI providers
+              Didukung oleh provider AI terkemuka di dunia
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8">
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6">
               {PROVIDER_LOGOS.map((p) => (
                 <div
                   key={p.name}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-white border border-gray-100 shadow-sm"
                 >
-                  <div
-                    className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: p.color }}
-                  />
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
                   <span className="text-sm font-medium text-gray-700">{p.name}</span>
                 </div>
               ))}
-              <div className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-400">
-                +47 more
-              </div>
+              <div className="px-3 py-1.5 text-sm text-gray-400">+47 lainnya</div>
             </div>
           </div>
         </div>
@@ -228,10 +223,10 @@ export default function OpenRouterHomePage() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-              Built for developers who move fast
+              Dibangun untuk kebebasan penuh
             </h2>
             <p className="text-gray-500 max-w-lg mx-auto">
-              Stop rebuilding integrations every time a new model drops. OpenRouter handles routing, fallbacks, and billing.
+              Tidak ada model bawaan server, tidak ada API key tersembunyi. Semua dari tanganmu sendiri.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -256,22 +251,23 @@ export default function OpenRouterHomePage() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-end justify-between mb-8">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Featured models</h2>
-              <p className="text-sm text-gray-500 mt-1">Top-ranked models across all providers</p>
+              <h2 className="text-2xl font-bold text-gray-900">Model unggulan</h2>
+              <p className="text-sm text-gray-500 mt-1">Model paling populer dari semua provider</p>
             </div>
             <Link
-              href="/openrouter/models"
+              href="/models"
               className="text-sm text-[#6467F2] hover:text-[#5558e8] font-medium flex items-center gap-1 transition-colors"
             >
-              View all
+              Lihat semua
               <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {FEATURED_MODELS.map((model) => (
-              <div
+              <Link
                 key={model.id}
-                className="bg-white rounded-xl border border-gray-100 p-4 hover:border-[#6467F2]/30 hover:shadow-md transition-all duration-150 cursor-pointer group"
+                href="/models"
+                className="bg-white rounded-xl border border-gray-100 p-4 hover:border-[#6467F2]/30 hover:shadow-md transition-all duration-150 cursor-pointer group block"
               >
                 <div className="flex items-start justify-between mb-2">
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${model.badgeColor}`}>
@@ -285,9 +281,9 @@ export default function OpenRouterHomePage() {
                 <p className="text-xs text-gray-500 leading-relaxed mb-3">{model.description}</p>
                 <div className="flex items-center justify-between pt-2 border-t border-gray-50 text-xs text-gray-400">
                   <span>{model.context} ctx</span>
-                  <span>{model.inputPrice} in</span>
+                  <span>{model.inputPriceLabel} input</span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
 
@@ -298,14 +294,14 @@ export default function OpenRouterHomePage() {
                 <Star className="w-3.5 h-3.5 text-[#6467F2]" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-900 mb-1">Free models available</p>
+                <p className="text-sm font-semibold text-gray-900 mb-1">Model gratis tersedia</p>
                 <p className="text-xs text-gray-500 mb-2">
-                  Get started without a credit card using community-supported free models.
+                  Mulai tanpa kartu kredit menggunakan model gratis yang didukung komunitas.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {FREE_MODELS.map((m) => (
-                    <span key={m.name} className="text-xs px-2.5 py-1 bg-white border border-[#6467F2]/10 rounded-full text-gray-600">
-                      {m.name}
+                    <span key={m} className="text-xs px-2.5 py-1 bg-white border border-[#6467F2]/10 rounded-full text-gray-600">
+                      {m}
                     </span>
                   ))}
                 </div>
@@ -320,9 +316,9 @@ export default function OpenRouterHomePage() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-              Up and running in minutes
+              Mulai dalam hitungan menit
             </h2>
-            <p className="text-gray-500">Three steps to access every AI model on the market.</p>
+            <p className="text-gray-500">Tiga langkah untuk akses semua model AI yang ada.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl mx-auto">
             {STEPS.map((s, i) => (
@@ -346,12 +342,12 @@ export default function OpenRouterHomePage() {
                 <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
                 <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
                 <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
-                <span className="text-xs text-gray-400 ml-2">example.ts</span>
+                <span className="text-xs text-gray-400 ml-2">contoh.ts</span>
               </div>
               <div className="bg-gray-950 p-5 overflow-x-auto">
                 <pre className="text-sm leading-relaxed">
                   <code>
-                    <span className="text-gray-400">{'// Works with any OpenAI-compatible SDK\n'}</span>
+                    <span className="text-gray-400">{'// Kompatibel dengan OpenAI SDK\n'}</span>
                     <span className="text-blue-400">{'const '}</span>
                     <span className="text-white">{'response = await openai.chat.completions.create'}</span>
                     <span className="text-yellow-300">{'({'}</span>
@@ -369,12 +365,12 @@ export default function OpenRouterHomePage() {
                     <span className="text-white">{', '}</span>
                     <span className="text-red-300">{'content'}</span>
                     <span className="text-white">{': '}</span>
-                    <span className="text-green-300">{'"Hello!"'}</span>
+                    <span className="text-green-300">{'"Halo!"'}</span>
                     <span className="text-yellow-300">{' }'}</span>
                     <span className="text-white">{'],\n'}</span>
                     <span className="text-yellow-300">{'}'}</span>
                     <span className="text-white">{');\n\n'}</span>
-                    <span className="text-gray-400">{'// Point baseURL at OpenRouter\n'}</span>
+                    <span className="text-gray-400">{'// Arahkan baseURL ke OpenRouter\n'}</span>
                     <span className="text-blue-400">{'const '}</span>
                     <span className="text-white">{'openai = new OpenAI'}</span>
                     <span className="text-yellow-300">{'({'}</span>
@@ -400,14 +396,14 @@ export default function OpenRouterHomePage() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-end justify-between mb-8">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Recent announcements</h2>
-              <p className="text-sm text-gray-500 mt-1">Latest models, features, and updates</p>
+              <h2 className="text-2xl font-bold text-gray-900">Update terbaru</h2>
+              <p className="text-sm text-gray-500 mt-1">Model baru, fitur, dan peningkatan</p>
             </div>
             <Link
               href="#"
               className="text-sm text-[#6467F2] hover:text-[#5558e8] font-medium flex items-center gap-1 transition-colors"
             >
-              View all
+              Lihat semua
               <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
@@ -438,23 +434,23 @@ export default function OpenRouterHomePage() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="max-w-2xl mx-auto text-center bg-gradient-to-br from-[#6467F2] to-[#818DF8] rounded-2xl p-10 shadow-xl shadow-[#6467F2]/20">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
-              Start building today
+              Mulai sekarang, gratis
             </h2>
             <p className="text-[#c5c7fb] mb-7">
-              Free tier available. No credit card required. Access to all free models immediately.
+              Tidak perlu kartu kredit. Akses langsung ke semua model gratis.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
-                href="#"
+                href="/chat"
                 className="px-6 py-2.5 text-sm font-medium text-[#6467F2] bg-white hover:bg-gray-50 rounded-full transition-colors duration-150"
               >
-                Create free account
+                Buka chat sekarang
               </Link>
               <Link
-                href="#"
+                href="/agent"
                 className="px-6 py-2.5 text-sm font-medium text-white border border-white/30 hover:bg-white/10 rounded-full transition-colors duration-150 flex items-center gap-2"
               >
-                Read the docs
+                Coba Agent Builder
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
