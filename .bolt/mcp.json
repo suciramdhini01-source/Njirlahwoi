@@ -7,7 +7,7 @@
       "enabled": false
     },
     "firecrawl": {
-      "enabled": false
+      "enabled": true
     }
   }
 }
