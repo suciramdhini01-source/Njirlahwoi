@@ -1,0 +1,44 @@
+KAMU ADALAH FULL-STACK ENGINEER DAN WEB PLATFORM SPECIALIST. TUGASMU: IMPLEMENTASIKAN FITUR "LIVE PREVIEW" PRODUKSI NYATA DI HALAMAN AGENT NJIRLAH AI SETELAH AGEN SELESAI MENULIS KODE. TIDAK ADA SIMULASI, TIDAK ADA IFRAME STATIS. KAMU HARUS MENGGUNAKAN TEKNOLOGI YANG BENAR-BENAR MENJALANKAN PROYEK DI BROWSER.
+
+## 1. PERSYARATAN UTAMA
+- **Fitur ini dipicu** setelah agen selesai menghasilkan semua file proyek (event `done` dari endpoint `/api/agent/generate`).
+- Panel kanan halaman `/agent` akan diisi oleh instance **WebContainers** yang menjalankan proyek tersebut secara live.
+- Pengguna dapat melihat proses booting (npm install, run dev) dan kemudian server development yang berjalan.
+- Semua ini terjadi di browser pengguna, tidak ada keterlibatan server backend.
+
+## 2. TEKNOLOGI YANG WAJIB DIGUNAKAN
+- **WebContainers API** (`@webcontainer/api`). Ini adalah satu-satunya cara standar untuk menjalankan Node.js (termasuk Next.js, Vite, dll.) secara native di browser.
+- **Zustand**: Untuk menyimpan status booting, URL preview, dan error.
+
+## 3. IMPLEMENTASI BACKEND DAN FRONTEND
+
+### A. Persiapan di `/api/agent/generate`
+- Setelah semua file proyek selesai dihasilkan dan dikirim via SSE, endpoint ini tidak melakukan apa pun untuk preview. Semua logika ada di frontend.
+
+### B. Komponen `WebContainerPreview.tsx` (Komponen Utama di Panel Kanan)
+1.  **Inisialisasi WebContainer**: Saat komponen menerima props `files` (objek dengan key nama file dan value konten), ia akan memanggil `WebContainer.boot()` untuk membuat instance baru.
+2.  **Mount Files**: Gunakan metode `instance.mount(files)` untuk memasukkan semua file yang dihasilkan agen ke dalam filesystem virtual WebContainer.
+3.  **Instalasi Dependensi**: Jalankan `instance.spawn('npm', ['install'])` untuk menginstal dependensi yang diperlukan (React, ReactDOM, Vite, dll.) jika ada `package.json`.
+4.  **Menjalankan Server Dev**: Jalankan `instance.spawn('npm', ['run', 'dev'])`. Tangkap output dari proses ini untuk menampilkan log booting secara real-time di UI (seperti terminal mini).
+5.  **Mendapatkan URL Preview**: WebContainer akan memberikan URL lokal (biasanya `https://localhost:5173` atau port lain) ketika server siap. Gunakan event listener `instance.on('server-ready', (port, url) => ...)` untuk mendapatkan URL ini.
+6.  **Menampilkan Preview**: Setelah URL didapatkan, render sebuah `<iframe>` yang `src`-nya mengarah ke URL tersebut. Iframe ini akan menampilkan aplikasi yang sedang berjalan.
+
+### C. State Management (`usePreviewStore`)
+- `status`: 'idle' | 'booting' | 'installing' | 'running' | 'error'
+- `previewUrl`: string | null
+- `logs`: string[] (untuk output terminal)
+- Action: `bootProject(files: Record<string, string>)`, `reset()`
+
+### D. Penanganan Error & Batasan
+- Jika proyek gagal boot (misal: ada error sintaks), tangkap stderr dari proses `spawn` dan tampilkan pesan error yang jelas di UI, bukan sekadar layar putih.
+- Beberapa framework (seperti Next.js) mungkin tidak berjalan sempurna di WebContainers karena keterbatasan lingkungan browser. Untuk itu, berikan fallback: jika proyek tidak memiliki `package.json`, jalankan langsung sebagai HTML statis menggunakan metode `srcdoc` (karena itu bukan simulasi, melainkan rendering langsung konten yang sudah ada).
+- Untuk proyek React/JSX tanpa build tool, gunakan Babel standalone di dalam iframe sebagai alternatif.
+
+## 4. DELIVERABLES (HANYA FILE PENTING)
+1.  **`components/preview/WebContainerPreview.tsx`**: Komponen utama yang menangani seluruh alur di atas.
+2.  **`store/preview-store.ts`**: Store Zustand untuk status booting dan URL.
+3.  **`lib/build-filesystem-tree.ts`**: Helper untuk mengubah objek `Record<string, string>` dari agen menjadi struktur yang cocok untuk `instance.mount()`.
+4.  **Update `app/agent/page.tsx`**: Integrasikan `WebContainerPreview` ke panel kanan, menggantikan placeholder sebelumnya.
+
+## 5. PERINTAH AKHIR
+**BANGUN SEMUA KODE DI ATAS DENGAN TEGAS. TIDAK BOLEH ADA SIMULASI. KALAU WEBCONTAINER TIDAK MEMUNGKINKAN, BERIKAN ALASAN TEKNIS SPESIFIK DAN FALLBACK YANG MASUK AKAL. JANGAN GUNAKAN IFRAME KOSONG SEBAGAI SIMULASI.**
