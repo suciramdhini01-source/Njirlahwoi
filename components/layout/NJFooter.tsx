@@ -8,8 +8,8 @@ const FOOTER_COLS = [
       { label: 'Models', href: '/models' },
       { label: 'Rankings', href: '/rankings' },
       { label: 'Chat', href: '/chat' },
+      { label: 'NJIRLAH AI Chat', href: '/chat-njirlah' },
       { label: 'Agent Builder', href: '/agent' },
-      { label: 'API Reference', href: '#' },
     ],
   },
   {
@@ -61,7 +61,7 @@ export default function NJFooter() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-8">
           {/* Brand */}
           <div className="col-span-2 sm:col-span-3 lg:col-span-1">
-            <Link href="/home" className="flex items-center gap-2 mb-3 group w-fit">
+            <Link href="/" className="flex items-center gap-2 mb-3 group w-fit">
               <div className="w-6 h-6 rounded-md bg-gradient-to-br from-[#6467F2] to-[#818DF8] flex items-center justify-center">
                 <Zap className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
               </div>

@@ -9,8 +9,8 @@ const NAV_LINKS = [
   { label: 'Models', href: '/models' },
   { label: 'Rankings', href: '/rankings' },
   { label: 'Chat', href: '/chat' },
-  { label: 'Docs', href: '#' },
-  { label: 'Pricing', href: '#' },
+  { label: 'NJIRLAH AI', href: '/chat-njirlah' },
+  { label: 'Agent', href: '/agent' },
 ];
 
 export default function NJHeader() {
@@ -50,7 +50,7 @@ export default function NJHeader() {
     >
       <div className="max-w-7xl mx-auto px-4 h-full flex items-center gap-4">
         {/* Logo */}
-        <Link href="/home" className="flex items-center gap-2 shrink-0 group">
+        <Link href="/" className="flex items-center gap-2 shrink-0 group">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#6467F2] to-[#818DF8] flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
             <Zap className="w-4 h-4 text-white" strokeWidth={2.5} />
           </div>

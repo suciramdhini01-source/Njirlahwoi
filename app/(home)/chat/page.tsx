@@ -208,7 +208,7 @@ export default function NJChatPage() {
                   </button>
                 ))}
                 <div className="border-t border-gray-100 p-2">
-                  <Link href="/" className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-[#6467F2] hover:bg-[#6467F2]/5 rounded-md transition-colors">
+                  <Link href="/chat-njirlah" className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-[#6467F2] hover:bg-[#6467F2]/5 rounded-md transition-colors">
                     <Zap className="w-3 h-3" />
                     Buka NJIRLAH AI penuh (BYOK)
                   </Link>
@@ -348,7 +348,7 @@ export default function NJChatPage() {
             </div>
             <p className="text-center text-[10px] text-gray-400 mt-2">
               AI dapat membuat kesalahan. Verifikasi informasi penting.{' '}
-              <Link href="/" className="text-[#6467F2] hover:underline">Gunakan NJIRLAH AI penuh</Link>
+              <Link href="/chat-njirlah" className="text-[#6467F2] hover:underline">Gunakan NJIRLAH AI penuh</Link>
             </p>
           </div>
         </div>
