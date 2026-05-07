@@ -1,0 +1,19 @@
+{
+  "name": "njirlah-mock-api",
+  "version": "1.0.0",
+  "description": "Custom OpenAI-compatible API server that returns 'Njirlah' — deploy anywhere, compatible with any OpenAI SDK.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "uuid": "^10.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
+}
