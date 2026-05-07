@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "replit": {
-      "enabled": false
+      "enabled": true
     },
     "stitch": {
       "enabled": true
