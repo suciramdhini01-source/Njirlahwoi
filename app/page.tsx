@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
@@ -13,7 +13,6 @@ import ProgressBar from '@/components/ui/ProgressBar';
 import ToastStack from '@/components/ui/ToastStack';
 import { useChatStore } from '@/store/chat-store';
 import { useApiKeyStore } from '@/store/api-key-store';
-import { useState } from 'react';
 
 const UnicornBackground = dynamic(() => import('@/components/layout/UnicornBackground'), { ssr: false });
 const CustomCursor = dynamic(() => import('@/components/ui/CustomCursor'), { ssr: false });
@@ -21,13 +20,14 @@ const CustomCursor = dynamic(() => import('@/components/ui/CustomCursor'), { ssr
 export default function HomePage() {
   const [apiKeyOpen, setApiKeyOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
   const {
     chats, activeChatId, createChat, addMessage,
     isStreaming, streamingContent, setIsStreaming, setStreamingContent,
     selectedModel, selectedProvider, getActiveChat, _hasHydrated,
-    temperature, setTemperature,
+    temperature, setTemperature, setChatTitle,
   } = useChatStore();
 
   const { openrouterKey, loadKey } = useApiKeyStore();
@@ -38,7 +38,7 @@ export default function HomePage() {
     if (_hasHydrated && chats.length === 0) createChat();
   }, [_hasHydrated]);
 
-  // Ctrl+K command palette
+  // Ctrl+K
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); setCommandOpen((v) => !v); }
@@ -47,7 +47,7 @@ export default function HomePage() {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  // GSAP ScrollTrigger parallax (loaded lazily after mount)
+  // GSAP parallax
   useEffect(() => {
     let cleanup: (() => void) | null = null;
     (async () => {
@@ -55,16 +55,12 @@ export default function HomePage() {
         const { gsap } = await import('gsap');
         const { ScrollTrigger } = await import('gsap/ScrollTrigger');
         gsap.registerPlugin(ScrollTrigger);
-
         const bg = document.querySelector<HTMLElement>('[data-parallax-bg]');
         if (!bg) return;
-
         gsap.to(bg, {
-          y: -60,
-          ease: 'none',
+          y: -60, ease: 'none',
           scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom top', scrub: true },
         });
-
         cleanup = () => ScrollTrigger.getAll().forEach((t) => t.kill());
       } catch {}
     })();
@@ -74,13 +70,37 @@ export default function HomePage() {
   const activeChat = getActiveChat();
   const messages = activeChat?.messages ?? [];
 
+  /* ── Auto-generate title after first user message ── */
+  const generateTitle = useCallback(async (chatId: string, userMessage: string) => {
+    try {
+      const res = await fetch('/api/generate-title', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessage }),
+      });
+      if (res.ok) {
+        const { title } = (await res.json()) as { title: string };
+        if (title && title !== 'New Chat') {
+          setChatTitle(chatId, title);
+        }
+      }
+    } catch {}
+  }, [setChatTitle]);
+
   const sendMessage = async (content: string) => {
     let chatId = activeChatId;
     if (!chatId) chatId = createChat();
 
+    const isFirstMessage = (chats.find((c) => c.id === chatId)?.messages.length ?? 0) === 0;
+
     addMessage(chatId!, { role: 'user', content });
     setIsStreaming(true);
     setStreamingContent('');
+
+    // Auto-generate title for first message
+    if (isFirstMessage) {
+      generateTitle(chatId!, content);
+    }
 
     const history = [
       ...messages.map((m) => ({ role: m.role, content: m.content })),
@@ -103,9 +123,9 @@ export default function HomePage() {
         if (!openrouterKey) {
           addMessage(chatId!, {
             role: 'assistant',
-            content:
-              '⚠️ **OpenRouter API key diperlukan.**\n\nKlik **API Keys** di sidebar atau tekan **Ctrl+K** → "Manage API Keys" untuk memasukkan key kamu.',
+            content: '⚠️ **OpenRouter API key diperlukan.**\n\nKlik **API Keys** di sidebar atau tekan **Ctrl+K** → "Manage API Keys" untuk memasukkan key kamu.',
             model: selectedModel,
+            isError: true,
           });
           setIsStreaming(false);
           return;
@@ -148,17 +168,15 @@ export default function HomePage() {
         }
       }
 
-      addMessage(chatId!, {
-        role: 'assistant',
-        content: full || '(Respons kosong)',
-        model: selectedModel,
-      });
-    } catch (err: any) {
-      if (err.name !== 'AbortError') {
+      addMessage(chatId!, { role: 'assistant', content: full || '(Respons kosong)', model: selectedModel });
+    } catch (err: unknown) {
+      const error = err as { name?: string; message?: string };
+      if (error.name !== 'AbortError') {
         addMessage(chatId!, {
           role: 'assistant',
-          content: `❌ **Error:** ${err.message}\n\nCoba lagi atau cek API key kamu.`,
+          content: `❌ **Error:** ${error.message ?? 'Terjadi kesalahan'}\n\nCoba lagi atau cek API key kamu.`,
           model: selectedModel,
+          isError: true,
         });
       } else if (streamingContent) {
         addMessage(chatId!, {
@@ -184,19 +202,29 @@ export default function HomePage() {
     <div className="h-screen w-screen flex overflow-hidden bg-[#05050A] relative">
       <CustomCursor />
 
-      {/* Background with parallax data attr */}
+      {/* Background parallax */}
       <div data-parallax-bg className="fixed inset-0 z-0 pointer-events-none will-change-transform">
         <UnicornBackground />
       </div>
-
       <div className="absolute inset-0 bg-[#05050A]/40 z-0 pointer-events-none" />
+
+      {/* Progress bar */}
       <ProgressBar active={isStreaming} />
 
       <div className="relative z-10 flex w-full h-full">
-        <Sidebar onOpenApiKey={() => setApiKeyOpen(true)} />
+        {/* Sidebar (desktop + mobile overlay) */}
+        <Sidebar
+          onOpenApiKey={() => setApiKeyOpen(true)}
+          mobileOpen={mobileSidebarOpen}
+          onMobileClose={() => setMobileSidebarOpen(false)}
+        />
 
+        {/* Main content */}
         <div className="flex-1 flex flex-col min-w-0 h-full">
-          <Header onOpenCommand={() => setCommandOpen(true)} />
+          <Header
+            onOpenCommand={() => setCommandOpen(true)}
+            onToggleSidebar={() => setMobileSidebarOpen(true)}
+          />
 
           <ChatArea
             messages={messages}

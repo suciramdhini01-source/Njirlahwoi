@@ -1,0 +1,94 @@
+KAMU ADALAH SENIOR UI/UX ENGINEER DAN FRONTEND ARCHITECT. TUGASMU SEKARANG ADALAH MELAKUKAN PERUBAHAN BESAR (MAJOR OVERHAUL) PADA SELURUH UI/UX APLIKASI **NJIRLAH AI**. KAMU HARUS MEMBUAT PENGALAMAN PENGGUNA MENJADI JAUH LEBIH PREMIUM, INTUITIF, SOLID, DAN MENYENANGKAN SEPERTI APLIKASI KELAS DUNIA. IKUTI SEMUA SPESIFIKASI DI BAWAH INI DENGAN TEGAS, TANPA KECUALI.
+
+---
+
+## 1. TUJUAN PERUBAHAN
+Membangun ulang UI/UX NJIRLAH AI agar mendukung alur kerja "vibe coding" yang mulus, fokus pada tiga pilar:
+- **UX Intuitif**: Setiap elemen mudah dipahami, alur kerja jelas, dan tidak membingungkan.
+- **UI Premium**: Dark mode mendalam, glassmorphism, animasi halus, tipografi bersih, dan sentuhan neon.
+- **Platform Solid**: Dashboard untuk mengelola semua kunci API, indikator kesehatan, dan responsivitas penuh.
+
+---
+
+## 2. PERUBAHAN STRUKTURAL HALAMAN
+
+### a. **Header Panel Chat (Contextual Chat Header)**
+- Header panel utama chat tidak lagi hanya menampilkan "NJIRLAH AI", melainkan judul chat yang sedang aktif.
+- Jika chat belum memiliki judul, tampilkan "Chat Baru" dengan ikon pensil untuk mengedit.
+- Di sebelah kanan header: tombol **Pin Chat** (ikon pin), **Favorite** (bintang), dan menu tiga titik (opsi: rename, hapus, ekspor).
+- Animasi: judul chat muncul dengan efek fade+slide dari atas saat beralih.
+
+### b. **Sidebar yang Ditingkatkan**
+- **Pin & Favorite Sections**: Bagian atas sidebar menampilkan chat yang di-pin dan difavoritkan, dengan divider "Pinned" dan "Favorites". Item di dalamnya lebih kecil dan bisa di-drag untuk menyusun ulang.
+- **Auto-generated Title**: Setelah pengguna mengirim pesan pertama, panggil endpoint `/api/generate-title` yang menggunakan AI untuk membuat ringkasan 3-5 kata sebagai judul chat. Judul muncul di sidebar secara otomatis dengan animasi mengetik halus.
+- **Empty State**: Jika belum ada chat, tampilkan ilustrasi unicorn kecil dengan teks "Mulai percakapan pertamamu" dan tombol "Chat Baru" yang kontras.
+- **Collapse/Expand**: Sidebar bisa di-drag dari pinggir untuk melebarkan atau menciutkan (Framer Motion drag). Saat diciutkan, hanya ikon yang terlihat.
+
+### c. **Halaman "API NJIR" sebagai Dashboard Visual (BUKAN formulir polos)**
+- **Tata Letak**: Grid kartu untuk setiap penyedia (OpenRouter, Cloudflare, Alibaba, Custom). Setiap kartu menampilkan:
+  - Nama penyedia & logo.
+  - Status koneksi terakhir (lingkaran hijau/merah berdenyut).
+  - Latensi rata-rata (diukur saat test connection).
+  - Jumlah model yang tersedia.
+  - Tombol "Kelola" untuk membuka modal konfigurasi.
+- **Grafik Mini**: Di bagian atas dashboard, tampilkan grafik batang kecil (menggunakan elemen div animasi CSS atau library ringan) yang menunjukkan perbandingan latensi antar penyedia.
+- **Empty State**: Jika belum ada kunci yang dikonfigurasi, tampilkan kartu kosong dengan ikon kunci, teks "Belum ada penyedia terhubung", dan tombol "Tambah Penyedia Pertama".
+- **Tooltip Panduan**: Setiap field input memiliki tooltip (ikon "?") yang menjelaskan cara mendapatkan kunci, misal "Dapatkan di https://openrouter.ai/keys".
+
+---
+
+## 3. PENYEMPURNAAN KOMPONEN UTAMA
+
+### a. **Chat Input & Attachments**
+- **Smart Attachments**: Saat pengguna mengunggah file (gambar, PDF, kode), tampilkan preview kecil di atas input (chip dengan nama file, ikon, dan tombol hapus). Konteks file otomatis terbaca oleh AI.
+- **Input yang Lebih Kaya**: Tambahkan tombol lampiran (klip kertas) di samping kiri input. Tombol kirim tetap di kanan, dengan animasi morphing menjadi checkmark saat terkirim.
+- **Placeholder Dinamis**: Placeholder input berubah sesuai konteks, misal "Ketik pesan..." atau "Lanjutkan diskusi tentang file..." jika ada lampiran.
+
+### b. **Chat Bubble & Pesan**
+- **Regenerate & Copy**: Tombol regenerate (ikon panah melingkar) dan copy (ikon salin) muncul saat hover pada bubble AI, dengan tooltip.
+- **Like/Dislike**: Tombol jempol ke atas/bawah di bawah bubble AI untuk feedback. Saat diklik, beri animasi pop singkat dan simpan di state (tanpa mengirim ke server).
+- **Error Bubble**: Jika terjadi error, tampilkan bubble merah transparan dengan ikon peringatan, pesan error yang ramah (bukan kode teknis), dan tombol "Coba Lagi" atau "Periksa Kunci API".
+
+### c. **Model Selector yang Lebih Kuat**
+- **Search & Filter**: Pencarian teks langsung menyaring model. Filter dropdown untuk Provider (OpenAI, Anthropic, dll.), Tipe (chat, image, code), dan Status (gratis/berbayar).
+- **Model Card**: Setiap item menampilkan ikon provider, nama model, badge GRATIS, dan harga per token kecil.
+- **Tampilan Grid Alternatif**: Tombol untuk beralih antara list dan grid (kartu kecil) untuk eksplorasi model lebih visual.
+
+---
+
+## 4. ANIMASI & MIKROINTERAKSI BARU (WAJIB)
+- **Skeleton Loading**: Saat fetch daftar model atau chat history, tampilkan skeleton card dengan animasi shimmer.
+- **Chat Loading**: Tampilkan skeleton bubble (abu-abu berdenyut) sebelum respons AI pertama muncul.
+- **Bounce saat Notifikasi**: Gunakan animasi spring untuk notifikasi toast yang muncul dari atas kanan, dengan efek bounce ringan.
+- **Hover Scale**: Semua kartu (model, chat history) membesar 1.02x saat hover dengan transisi 0.2s.
+- **Progress Bar di Header**: Saat streaming respons, tampilkan progress bar tipis di bawah header panel chat (warna neon cyan, animasi lebar).
+- **Auto-scroll Cerdas**: Saat streaming, panel chat otomatis scroll ke bawah, kecuali pengguna sedang membaca ke atas. Jika pengguna scroll ke atas, tampilkan tombol "⬇️ Scroll ke bawah" mengambang.
+- **Konfeti Kemenangan**: Setelah agen selesai menghasilkan proyek (di halaman Agent), tampilkan animasi confetti (canvas-confetti).
+
+---
+
+## 5. RESPONSIVE & MOBILE
+- **Sidebar Overlay di Mobile**: Pada layar < 768px, sidebar berubah menjadi overlay yang bisa dibuka dengan tombol hamburger. Animasi slide dari kiri.
+- **Chat Full Width**: Panel chat mengambil lebar penuh, header lebih ringkas.
+- **Input Area Fixed**: Input chat tetap di bawah layar, dengan padding aman untuk keyboard mobile.
+
+---
+
+## 6. KONSISTENSI TEMA
+- **Warna**: `bg-[#05050A]` untuk background utama. Panel-panel: `bg-[#0a0a14]`. Glass: `backdrop-blur-2xl bg-white/5 border-white/10`.
+- **Neon Accent**: Purple `#A855F7`, Cyan `#06B6D4`, Pink `#EC4899`.
+- **Font**: Inter untuk body, Space Grotesk untuk heading.
+- **Icon**: Gunakan Lucide Icons (dari shadcn/ui) untuk konsistensi.
+
+---
+
+## 7. PERINTAH PELAKSANAAN
+1. **Audit setiap komponen** yang sudah ada dan perbarui sesuai spesifikasi di atas.
+2. **Buat komponen baru** jika diperlukan (Skeleton, PinSection, DashboardCard, Tooltip, AttachmentPreview, dll.).
+3. **Hubungkan dengan store** (Zustand) untuk auto-title, pin/favorite, dan status koneksi di dashboard API NJIR.
+4. **Jangan merusak fungsionalitas backend**; perubahan hanya di sisi UI/UX dan integrasi store.
+5. **Footer Andikaa Saputraa** tetap dipertahankan di semua halaman.
+
+---
+
+**MULAI SEKARANG. LAKUKAN PERUBAHAN BESAR UI/UX INI SECARA MENYELURUH. NJIRLAH AI HARUS MENJADI APLIKASI DENGAN PENGALAMAN PENGGUNA TERBAIK DI KELASNYA.**

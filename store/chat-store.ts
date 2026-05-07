@@ -12,6 +12,7 @@ export interface Message {
   model?: string;
   tokens?: number;
   liked?: boolean | null;
+  isError?: boolean;
 }
 
 export interface Chat {
@@ -22,6 +23,9 @@ export interface Chat {
   provider: 'openrouter' | 'cloudflare';
   createdAt: number;
   updatedAt: number;
+  pinned?: boolean;
+  favorited?: boolean;
+  titleGenerated?: boolean;
 }
 
 interface ChatState {
@@ -48,6 +52,10 @@ interface ChatState {
   setTemperature: (v: number) => void;
   getActiveChat: () => Chat | null;
   clearMessages: (chatId: string) => void;
+  renameChat: (chatId: string, title: string) => void;
+  setPinned: (chatId: string, pinned: boolean) => void;
+  setFavorited: (chatId: string, favorited: boolean) => void;
+  setChatTitle: (chatId: string, title: string) => void;
 }
 
 export const useChatStore = create<ChatState>()(
@@ -73,6 +81,9 @@ export const useChatStore = create<ChatState>()(
           provider: get().selectedProvider,
           createdAt: Date.now(),
           updatedAt: Date.now(),
+          pinned: false,
+          favorited: false,
+          titleGenerated: false,
         };
         set((s) => ({ chats: [chat, ...s.chats], activeChatId: id }));
         return id;
@@ -95,7 +106,7 @@ export const useChatStore = create<ChatState>()(
             if (c.id !== chatId) return c;
             const messages = [...c.messages, msg];
             const title =
-              c.messages.length === 0 && message.role === 'user'
+              c.messages.length === 0 && message.role === 'user' && !c.titleGenerated
                 ? message.content.slice(0, 42) + (message.content.length > 42 ? '…' : '')
                 : c.title;
             return { ...c, messages, title, updatedAt: Date.now() };
@@ -129,14 +140,40 @@ export const useChatStore = create<ChatState>()(
       setSelectedModel: (model) => set({ selectedModel: model }),
       setSelectedProvider: (provider) => set({ selectedProvider: provider }),
       setTemperature: (v) => set({ temperature: v }),
+
       getActiveChat: () => {
         const { chats, activeChatId } = get();
         return chats.find((c) => c.id === activeChatId) ?? null;
       },
+
       clearMessages: (chatId) =>
         set((s) => ({
           chats: s.chats.map((c) =>
-            c.id === chatId ? { ...c, messages: [], title: 'New Chat', updatedAt: Date.now() } : c
+            c.id === chatId ? { ...c, messages: [], title: 'New Chat', updatedAt: Date.now(), titleGenerated: false } : c
+          ),
+        })),
+
+      renameChat: (chatId, title) =>
+        set((s) => ({
+          chats: s.chats.map((c) =>
+            c.id === chatId ? { ...c, title, titleGenerated: true, updatedAt: Date.now() } : c
+          ),
+        })),
+
+      setPinned: (chatId, pinned) =>
+        set((s) => ({
+          chats: s.chats.map((c) => c.id === chatId ? { ...c, pinned } : c),
+        })),
+
+      setFavorited: (chatId, favorited) =>
+        set((s) => ({
+          chats: s.chats.map((c) => c.id === chatId ? { ...c, favorited } : c),
+        })),
+
+      setChatTitle: (chatId, title) =>
+        set((s) => ({
+          chats: s.chats.map((c) =>
+            c.id === chatId ? { ...c, title, titleGenerated: true } : c
           ),
         })),
     }),
