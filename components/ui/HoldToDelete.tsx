@@ -1,90 +1,73 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { Trash2 } from 'lucide-react';
 
 interface HoldToDeleteProps {
   onDelete: () => void;
-  duration?: number;
+  holdDuration?: number;
 }
 
-const R = 10;
-const CIRC = 2 * Math.PI * R;
-
-export default function HoldToDelete({ onDelete, duration = 1800 }: HoldToDeleteProps) {
+export default function HoldToDelete({ onDelete, holdDuration = 1800 }: HoldToDeleteProps) {
   const [progress, setProgress] = useState(0);
-  const [active, setActive] = useState(false);
-  const rafRef = useRef<number>(0);
-  const startRef = useRef<number>(0);
+  const [isHolding, setIsHolding] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startTimeRef = useRef<number>(0);
 
-  const start = () => {
-    setActive(true);
-    startRef.current = performance.now();
-    const tick = (now: number) => {
-      const elapsed = now - startRef.current;
-      const pct = Math.min(elapsed / duration, 1);
+  const startHold = () => {
+    setIsHolding(true);
+    startTimeRef.current = Date.now();
+    intervalRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTimeRef.current;
+      const pct = Math.min((elapsed / holdDuration) * 100, 100);
       setProgress(pct);
-      if (pct < 1) {
-        rafRef.current = requestAnimationFrame(tick);
-      } else {
-        setActive(false);
+      if (pct >= 100) {
+        clearInterval(intervalRef.current!);
+        setIsHolding(false);
         setProgress(0);
         onDelete();
       }
-    };
-    rafRef.current = requestAnimationFrame(tick);
+    }, 30);
   };
 
-  const cancel = () => {
-    cancelAnimationFrame(rafRef.current);
-    setActive(false);
+  const stopHold = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    setIsHolding(false);
     setProgress(0);
   };
 
-  const strokeDash = CIRC * (1 - progress);
+  const radius = 9;
+  const circ = 2 * Math.PI * radius;
+  const offset = circ - (progress / 100) * circ;
 
   return (
-    <button
-      onMouseDown={start}
-      onMouseUp={cancel}
-      onMouseLeave={cancel}
-      onTouchStart={start}
-      onTouchEnd={cancel}
-      className="relative flex items-center justify-center w-6 h-6 flex-shrink-0 select-none"
+    <motion.button
+      onMouseDown={startHold}
+      onMouseUp={stopHold}
+      onMouseLeave={stopHold}
+      onTouchStart={startHold}
+      onTouchEnd={stopHold}
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.95 }}
+      className="relative p-1.5 rounded-lg bg-brand-red/10 border border-brand-red/25 text-brand-red flex items-center justify-center"
       title="Tahan untuk hapus"
     >
-      <svg width={24} height={24} className="absolute inset-0 -rotate-90">
-        <circle
-          cx={12}
-          cy={12}
-          r={R}
-          fill="none"
-          stroke="rgba(239,68,68,0.2)"
-          strokeWidth={2}
-        />
-        <AnimatePresence>
-          {active && (
-            <motion.circle
-              cx={12}
-              cy={12}
-              r={R}
-              fill="none"
-              stroke="#EF4444"
-              strokeWidth={2}
-              strokeLinecap="round"
-              initial={{ strokeDashoffset: CIRC, strokeDasharray: CIRC }}
-              style={{ strokeDasharray: CIRC, strokeDashoffset: strokeDash }}
-            />
-          )}
-        </AnimatePresence>
+      <svg width="22" height="22" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90">
+        <circle cx="11" cy="11" r={radius} fill="none" stroke="rgba(255,59,48,0.15)" strokeWidth="2" />
+        {isHolding && (
+          <motion.circle
+            cx="11" cy="11" r={radius}
+            fill="none"
+            stroke="#FF3B30"
+            strokeWidth="2"
+            strokeDasharray={circ}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+          />
+        )}
       </svg>
-      <motion.div
-        animate={{ scale: active ? 1.2 : 1, color: active ? '#EF4444' : '#6B7280' }}
-        transition={{ type: 'spring', damping: 20 }}
-      >
-        <Trash2 size={11} />
-      </motion.div>
-    </button>
+      <Trash2 size={11} className="relative z-10" />
+    </motion.button>
   );
 }

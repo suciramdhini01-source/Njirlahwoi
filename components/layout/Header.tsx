@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Terminal, Pin, Star, MoreHorizontal, Pencil, Trash2,
-  Download, Check, X, Menu,
+  Download, Check, X, Menu, Zap,
 } from 'lucide-react';
 import ModelSelector from '@/components/ui/ModelSelector';
 import MultiStateBadge from '@/components/ui/MultiStateBadge';
@@ -16,7 +16,6 @@ interface HeaderProps {
   sidebarCollapsed?: boolean;
 }
 
-/* ── Editable chat title ─────────────────────────────────────────── */
 function EditableTitle({ chatId, title }: { chatId: string; title: string }) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(title);
@@ -44,12 +43,11 @@ function EditableTitle({ chatId, title }: { chatId: string; title: string }) {
           if (e.key === 'Enter') commit();
           if (e.key === 'Escape') { setValue(title); setEditing(false); }
         }}
-        className="bg-white/5 border border-neon-purple/30 rounded-lg px-2 py-0.5 text-xs sm:text-sm text-white font-medium outline-none w-full max-w-[160px] sm:max-w-[220px]"
+        className="bg-white/[0.06] border border-brand-blue/30 rounded-lg px-2 py-0.5 text-xs sm:text-sm text-white font-medium outline-none w-full max-w-[160px] sm:max-w-[220px]"
         maxLength={60}
       />
     );
   }
-
   return (
     <motion.button
       key={title}
@@ -57,15 +55,14 @@ function EditableTitle({ chatId, title }: { chatId: string; title: string }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', damping: 22, stiffness: 300 }}
       onClick={() => setEditing(true)}
-      className="group flex items-center gap-1 text-xs sm:text-sm font-medium text-white/75 hover:text-white transition-colors max-w-[130px] sm:max-w-[220px]"
+      className="group flex items-center gap-1 text-xs sm:text-sm font-medium text-white/60 hover:text-white transition-colors max-w-[130px] sm:max-w-[220px]"
     >
       <span className="truncate">{title === 'New Chat' ? 'Chat Baru' : title}</span>
-      <Pencil size={10} className="text-gray-700 group-hover:text-neon-purple transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100" />
+      <Pencil size={10} className="text-white/20 group-hover:text-brand-blue transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100" />
     </motion.button>
   );
 }
 
-/* ── 3-dot context menu ──────────────────────────────────────────── */
 function ChatMenu({
   chatId, isPinned, isFavorited, onPin, onFav, onDelete,
 }: {
@@ -89,12 +86,12 @@ function ChatMenu({
 
   const items = [
     {
-      icon: <Pin size={12} className={isPinned ? 'fill-neon-purple text-neon-purple' : ''} />,
+      icon: <Pin size={12} className={isPinned ? 'fill-brand-amber text-brand-amber' : ''} />,
       label: isPinned ? 'Lepas Pin' : 'Sematkan Chat',
       action: () => { onPin(); setOpen(false); },
     },
     {
-      icon: <Star size={12} className={isFavorited ? 'fill-yellow-400 text-yellow-400' : ''} />,
+      icon: <Star size={12} className={isFavorited ? 'fill-brand-pistachio text-brand-pistachio' : ''} />,
       label: isFavorited ? 'Hapus Favorit' : 'Tambah Favorit',
       action: () => { onFav(); setOpen(false); },
     },
@@ -114,14 +111,12 @@ function ChatMenu({
   return (
     <div ref={ref} className="relative">
       <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
         onClick={() => setOpen((v) => !v)}
-        className="p-1.5 rounded-lg text-gray-600 hover:text-gray-300 hover:bg-white/8 transition-all"
+        className="p-1.5 rounded-lg text-white/25 hover:text-white/70 hover:bg-white/[0.06] transition-all"
       >
         <MoreHorizontal size={14} />
       </motion.button>
-
       <AnimatePresence>
         {open && (
           <motion.div
@@ -129,14 +124,14 @@ function ChatMenu({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: -6 }}
             transition={{ type: 'spring', damping: 26, stiffness: 400 }}
-            className="absolute right-0 top-full mt-1.5 w-44 glass border border-white/15 rounded-xl overflow-hidden shadow-2xl z-50"
+            className="absolute right-0 top-full mt-1.5 w-46 glass border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50"
           >
             {items.map((item, i) => (
               <button
                 key={i}
                 onClick={item.action}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs transition-colors hover:bg-white/8 ${
-                  item.danger ? 'text-red-400 hover:text-red-300' : 'text-gray-300 hover:text-white'
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs transition-colors hover:bg-white/[0.06] ${
+                  item.danger ? 'text-brand-red hover:text-brand-red' : 'text-white/60 hover:text-white'
                 }`}
               >
                 {item.icon}
@@ -150,9 +145,7 @@ function ChatMenu({
   );
 }
 
-/* ── Logo ─────────────────────────────────────────────────────────── */
 function Logo() {
-  const [hovered, setHovered] = useState(false);
   const [easterEgg, setEasterEgg] = useState(false);
   const [clicks, setClicks] = useState(0);
 
@@ -163,8 +156,6 @@ function Logo() {
         setClicks(n);
         if (n >= 3) { setEasterEgg(true); setClicks(0); setTimeout(() => setEasterEgg(false), 3200); }
       }}
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
       whileHover={{ scale: 1.06 }}
       whileTap={{ scale: 0.94 }}
       className="relative flex items-center gap-1.5 select-none flex-shrink-0"
@@ -176,10 +167,7 @@ function Logo() {
       >
         🦄
       </motion.span>
-      {/* Only show text label on sm+ */}
-      <span className="hidden sm:block font-black text-sm font-heading gradient-text whitespace-nowrap">
-        NJIRLAH AI
-      </span>
+      <span className="hidden sm:block font-black text-sm font-heading gradient-text whitespace-nowrap">NJIRLAH AI</span>
       <AnimatePresence>
         {easterEgg && (
           <motion.div
@@ -188,7 +176,7 @@ function Logo() {
             exit={{ opacity: 0, scale: 0.5 }}
             className="absolute left-full ml-2 flex gap-0.5 whitespace-nowrap pointer-events-none z-50"
           >
-            {['🌟', '✨', '💜', '🦄'].map((e, i) => (
+            {['🌟', '✨', '💚', '🦄'].map((e, i) => (
               <motion.span key={i} animate={{ y: [0, -14, 0] }} transition={{ duration: 0.55, delay: i * 0.07, repeat: 4 }} className="text-sm">{e}</motion.span>
             ))}
           </motion.div>
@@ -219,27 +207,19 @@ export default function Header({ onOpenCommand, onToggleSidebar }: HeaderProps) 
   };
 
   return (
-    <div className="flex items-center justify-between px-2 sm:px-3 py-2 sm:py-2.5 border-b border-white/10 bg-[#0a0a14]/80 backdrop-blur-xl flex-shrink-0 relative z-10 gap-2">
-
-      {/* ── LEFT: hamburger + logo + chat title ── */}
+    <div className="flex items-center justify-between px-2 sm:px-3 py-2 sm:py-2.5 border-b border-white/[0.06] bg-[#0A0A14]/85 backdrop-blur-xl flex-shrink-0 relative z-10 gap-2">
+      {/* LEFT */}
       <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0 flex-1">
-        {/* Mobile hamburger */}
         <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
           onClick={onToggleSidebar}
           aria-label="Buka sidebar"
-          className="md:hidden p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/10 transition-all flex-shrink-0"
+          className="md:hidden p-1.5 rounded-lg text-brand-blue/70 hover:text-brand-blue hover:bg-brand-blue/10 transition-all flex-shrink-0"
         >
           <Menu size={16} />
         </motion.button>
-
         <Logo />
-
-        {/* Divider — hidden on mobile */}
-        {activeChat && <div className="w-px h-4 bg-white/10 flex-shrink-0 hidden sm:block" />}
-
-        {/* Contextual chat title */}
+        {activeChat && <div className="w-px h-4 bg-white/[0.08] flex-shrink-0 hidden sm:block" />}
         {activeChat && activeChatId && (
           <div className="flex items-center gap-1 min-w-0">
             <EditableTitle chatId={activeChatId} title={activeChat.title} />
@@ -247,40 +227,34 @@ export default function Header({ onOpenCommand, onToggleSidebar }: HeaderProps) 
         )}
       </div>
 
-      {/* ── RIGHT: actions + model + badge + ⌘K ── */}
+      {/* RIGHT */}
       <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
-
-        {/* Pin + Fav — desktop only, in 3-dot on mobile */}
         {activeChat && activeChatId && (
           <>
             <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
               onClick={() => setPinned(activeChatId, !activeChat.pinned)}
               className={`hidden sm:flex p-1.5 rounded-lg transition-all ${
                 activeChat.pinned
-                  ? 'text-neon-purple bg-neon-purple/15 border border-neon-purple/20'
-                  : 'text-gray-700 hover:text-gray-400 hover:bg-white/8'
+                  ? 'text-brand-amber bg-brand-amber/12 border border-brand-amber/25'
+                  : 'text-white/25 hover:text-brand-amber/70 hover:bg-brand-amber/8'
               }`}
               title="Pin chat"
             >
-              <Pin size={13} className={activeChat.pinned ? 'fill-neon-purple' : ''} />
+              <Pin size={13} className={activeChat.pinned ? 'fill-brand-amber' : ''} />
             </motion.button>
-
             <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
               onClick={() => setFavorited(activeChatId, !activeChat.favorited)}
               className={`hidden sm:flex p-1.5 rounded-lg transition-all ${
                 activeChat.favorited
-                  ? 'text-yellow-400 bg-yellow-400/10 border border-yellow-400/20'
-                  : 'text-gray-700 hover:text-gray-400 hover:bg-white/8'
+                  ? 'text-brand-pistachio bg-brand-pistachio/12 border border-brand-pistachio/25'
+                  : 'text-white/25 hover:text-brand-pistachio/70 hover:bg-brand-pistachio/8'
               }`}
               title="Favoritkan"
             >
-              <Star size={13} className={activeChat.favorited ? 'fill-yellow-400' : ''} />
+              <Star size={13} className={activeChat.favorited ? 'fill-brand-pistachio' : ''} />
             </motion.button>
-
             <ChatMenu
               chatId={activeChatId}
               isPinned={activeChat.pinned}
@@ -289,20 +263,15 @@ export default function Header({ onOpenCommand, onToggleSidebar }: HeaderProps) 
               onFav={() => setFavorited(activeChatId, !activeChat.favorited)}
               onDelete={handleDelete}
             />
-
-            <div className="w-px h-4 bg-white/10 mx-0.5 hidden sm:block" />
+            <div className="w-px h-4 bg-white/[0.08] mx-0.5 hidden sm:block" />
           </>
         )}
-
         <ModelSelector />
         <MultiStateBadge state={badgeState} provider={provider} />
-
-        {/* ⌘K — desktop only */}
         <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.93 }}
+          whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.93 }}
           onClick={onOpenCommand}
-          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl glass text-gray-500 hover:text-neon-purple hover:border-neon-purple/30 transition-all border border-white/10"
+          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl glass-sm text-white/30 hover:text-brand-blue hover:border-brand-blue/25 transition-all border border-white/[0.08]"
           title="Command Palette (Ctrl+K)"
         >
           <Terminal size={12} />

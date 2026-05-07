@@ -29,7 +29,7 @@ export default function ImageReveal({ children, className = '', delay = 0 }: Ima
         animate={inView ? { scaleX: 0 } : {}}
         transition={{ type: 'spring', damping: 22, stiffness: 200, delay: delay + 0.08 }}
         style={{ originX: 1 }}
-        className="absolute inset-0 bg-gradient-to-r from-neon-purple/40 to-neon-cyan/40 pointer-events-none"
+        className="absolute inset-0 bg-gradient-to-r from-brand-blue/40 to-brand-green/40 pointer-events-none"
       />
     </div>
   );

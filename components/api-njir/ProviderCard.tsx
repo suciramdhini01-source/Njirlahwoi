@@ -120,7 +120,7 @@ export default function ProviderCard({
             href={docsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-shrink-0 p-1 rounded-lg text-gray-600 hover:text-neon-cyan hover:bg-neon-cyan/10 transition-colors"
+            className="flex-shrink-0 p-1 rounded-lg text-gray-600 hover:text-brand-green hover:bg-brand-green/10 transition-colors"
           >
             <ExternalLink size={12} />
           </a>
@@ -128,7 +128,7 @@ export default function ProviderCard({
       </div>
 
       {/* Main key input */}
-      <div className="flex items-center gap-2 bg-black/30 border border-white/10 rounded-xl px-3 py-2 focus-within:border-neon-purple/40 transition-colors">
+      <div className="flex items-center gap-2 bg-black/30 border border-white/10 rounded-xl px-3 py-2 focus-within:border-brand-blue/40 transition-colors">
         <Lock size={11} className="text-gray-600 flex-shrink-0" />
         <input
           type={show ? 'text' : 'password'}
@@ -147,7 +147,7 @@ export default function ProviderCard({
 
       {/* Extra fields (e.g. Account ID for Cloudflare) */}
       {extraFields?.map((field) => (
-        <div key={field.key} className="mt-2 flex items-center gap-2 bg-black/30 border border-white/10 rounded-xl px-3 py-2 focus-within:border-neon-purple/40 transition-colors">
+        <div key={field.key} className="mt-2 flex items-center gap-2 bg-black/30 border border-white/10 rounded-xl px-3 py-2 focus-within:border-brand-blue/40 transition-colors">
           <Lock size={11} className="text-gray-600 flex-shrink-0" />
           <input
             type="text"
@@ -167,7 +167,7 @@ export default function ProviderCard({
           whileTap={{ scale: 0.95 }}
           onClick={handleTest}
           disabled={!input.trim() || testing}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-gray-400 hover:text-white hover:border-neon-cyan/30 hover:bg-neon-cyan/5 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-gray-400 hover:text-white hover:border-brand-green/30 hover:bg-brand-green/5 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
         >
           <Zap size={10} />
           Test
@@ -178,7 +178,7 @@ export default function ProviderCard({
           whileTap={{ scale: 0.95 }}
           onClick={handleSave}
           disabled={!input.trim() || saving || !isDirty}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neon-purple/10 border border-neon-purple/30 text-xs text-neon-purple hover:bg-neon-purple/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-blue/10 border border-brand-blue/30 text-xs text-brand-blue hover:bg-brand-blue/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
         >
           {saving ? <Loader2 size={10} className="animate-spin" /> : <Save size={10} />}
           Simpan

@@ -2,47 +2,41 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 
-type State = 'online' | 'streaming' | 'offline' | 'thinking';
-
 interface MultiStateBadgeProps {
-  state: State;
+  state: 'online' | 'streaming' | 'offline' | 'loading';
   provider?: string;
 }
 
-const CONFIG: Record<State, { color: string; dot: string; label: string; pulse: boolean }> = {
-  online:    { color: 'text-neon-cyan',   dot: 'bg-neon-cyan',   label: 'Online',     pulse: false },
-  streaming: { color: 'text-neon-purple', dot: 'bg-neon-purple', label: 'Streaming',  pulse: true  },
-  thinking:  { color: 'text-neon-pink',   dot: 'bg-neon-pink',   label: 'Thinking',   pulse: true  },
-  offline:   { color: 'text-gray-500',    dot: 'bg-gray-600',    label: 'Offline',    pulse: false },
+const stateConfig = {
+  online:    { label: 'Online',   dotClass: 'bg-brand-green',  textClass: 'text-brand-green',  bgClass: 'bg-brand-green/8 border-brand-green/18' },
+  streaming: { label: 'Streaming',dotClass: 'bg-brand-blue',   textClass: 'text-brand-blue',   bgClass: 'bg-brand-blue/8 border-brand-blue/18' },
+  offline:   { label: 'Offline',  dotClass: 'bg-brand-red',    textClass: 'text-brand-red',    bgClass: 'bg-brand-red/8 border-brand-red/18' },
+  loading:   { label: 'Loading',  dotClass: 'bg-brand-amber',  textClass: 'text-brand-amber',  bgClass: 'bg-brand-amber/8 border-brand-amber/18' },
 };
 
 export default function MultiStateBadge({ state, provider }: MultiStateBadgeProps) {
-  const cfg = CONFIG[state];
+  const cfg = stateConfig[state] ?? stateConfig.online;
 
   return (
     <AnimatePresence mode="wait">
       <motion.div
         key={state}
-        initial={{ opacity: 0, scale: 0.8, y: -4 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.8, y: 4 }}
+        initial={{ opacity: 0, scale: 0.85 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.85 }}
         transition={{ type: 'spring', damping: 22, stiffness: 360 }}
-        className={`flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-full sm:rounded-xl glass border border-white/10 ${cfg.color} flex-shrink-0`}
+        className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-[10px] font-medium ${cfg.bgClass} ${cfg.textClass}`}
       >
-        <div className="relative flex-shrink-0">
-          <div className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-          {cfg.pulse && (
-            <motion.div
-              className={`absolute inset-0 rounded-full ${cfg.dot}`}
-              animate={{ scale: [1, 2.5], opacity: [0.6, 0] }}
-              transition={{ duration: 0.9, repeat: Infinity, ease: 'easeOut' }}
-            />
-          )}
-        </div>
-        {/* Text hidden on mobile, visible on sm+ */}
-        <span className="hidden sm:inline text-[10px] font-medium whitespace-nowrap">
-          {provider ? `${provider} · ${cfg.label}` : cfg.label}
-        </span>
+        <motion.div
+          className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${cfg.dotClass}`}
+          animate={state === 'streaming'
+            ? { scale: [1, 1.6, 1], opacity: [1, 0.4, 1] }
+            : state === 'online'
+            ? { scale: [1, 1.3, 1] }
+            : {}}
+          transition={{ duration: state === 'streaming' ? 0.7 : 2, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <span className="whitespace-nowrap">{provider ? provider : cfg.label}</span>
       </motion.div>
     </AnimatePresence>
   );

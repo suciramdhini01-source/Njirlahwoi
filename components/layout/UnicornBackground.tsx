@@ -9,8 +9,7 @@ export default function UnicornBackground() {
   const animRef = useRef<number>(0);
 
   const [glowSpring, glowApi] = useSpring(() => ({
-    x: -200,
-    y: -200,
+    x: -200, y: -200,
     config: { mass: 3, tension: 80, friction: 40 },
   }));
 
@@ -35,17 +34,17 @@ export default function UnicornBackground() {
     resize();
     window.addEventListener('resize', resize);
 
-    const COLORS = ['#A855F7', '#06B6D4', '#EC4899', '#7C3AED', '#0891B2'];
-    const count = 70;
+    const COLORS = ['#FF3B30', '#34C759', '#5AC8FA', '#A9D171', '#FF9500', '#A855F7'];
+    const count = 55;
     const particles = Array.from({ length: count }, () => ({
       x: Math.random() * window.innerWidth,
       y: Math.random() * window.innerHeight,
-      vx: (Math.random() - 0.5) * 0.35,
-      vy: (Math.random() - 0.5) * 0.35,
-      r: Math.random() * 1.8 + 0.4,
+      vx: (Math.random() - 0.5) * 0.28,
+      vy: (Math.random() - 0.5) * 0.28,
+      r: Math.random() * 1.6 + 0.3,
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
       alpha: Math.random(),
-      alphaD: Math.random() > 0.5 ? 0.004 : -0.004,
+      alphaD: Math.random() > 0.5 ? 0.003 : -0.003,
     }));
 
     const draw = () => {
@@ -63,19 +62,19 @@ export default function UnicornBackground() {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.alpha * 0.65;
+        ctx.globalAlpha = p.alpha * 0.5;
         ctx.fill();
 
         for (let j = i + 1; j < particles.length; j++) {
           const q = particles[j];
           const dx = p.x - q.x, dy = p.y - q.y;
           const d = Math.sqrt(dx * dx + dy * dy);
-          if (d < 110) {
+          if (d < 100) {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(q.x, q.y);
             ctx.strokeStyle = p.color;
-            ctx.globalAlpha = ((110 - d) / 110) * 0.12;
+            ctx.globalAlpha = ((100 - d) / 100) * 0.09;
             ctx.lineWidth = 0.4;
             ctx.stroke();
           }
@@ -84,7 +83,6 @@ export default function UnicornBackground() {
       ctx.globalAlpha = 1;
       animRef.current = requestAnimationFrame(draw);
     };
-
     draw();
     return () => {
       cancelAnimationFrame(animRef.current);
@@ -94,41 +92,40 @@ export default function UnicornBackground() {
 
   return (
     <>
-      <canvas ref={canvasRef} className="fixed inset-0 z-0 pointer-events-none" style={{ opacity: 0.55 }} />
-
-      {/* Ambient glow layers */}
+      <canvas ref={canvasRef} className="fixed inset-0 z-0 pointer-events-none" style={{ opacity: 0.45 }} />
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(ellipse at 20% 50%, rgba(168,85,247,0.07) 0%, transparent 55%), radial-gradient(ellipse at 80% 20%, rgba(6,182,212,0.07) 0%, transparent 55%), radial-gradient(ellipse at 50% 80%, rgba(236,72,153,0.05) 0%, transparent 55%)',
-          }}
-        />
-
-        {/* Follow-pointer glow */}
+        <div className="absolute inset-0" style={{
+          background: [
+            'radial-gradient(ellipse at 15% 40%, rgba(255,59,48,0.05) 0%, transparent 50%)',
+            'radial-gradient(ellipse at 85% 20%, rgba(90,200,250,0.05) 0%, transparent 50%)',
+            'radial-gradient(ellipse at 50% 85%, rgba(52,199,89,0.04) 0%, transparent 50%)',
+          ].join(', '),
+        }} />
         <animated.div
           className="absolute w-[300px] h-[300px] rounded-full pointer-events-none"
           style={{
-            x: glowSpring.x,
-            y: glowSpring.y,
-            background: 'radial-gradient(circle, rgba(168,85,247,0.12) 0%, transparent 70%)',
-            filter: 'blur(30px)',
+            x: glowSpring.x, y: glowSpring.y,
+            background: 'radial-gradient(circle, rgba(90,200,250,0.1) 0%, transparent 70%)',
+            filter: 'blur(28px)',
           }}
         />
-
-        {/* Floating blobs */}
         <motion.div
           className="absolute top-1/4 left-1/5 w-80 h-80 rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(168,85,247,0.06) 0%, transparent 70%)', filter: 'blur(50px)' }}
+          style={{ background: 'radial-gradient(circle, rgba(52,199,89,0.05) 0%, transparent 70%)', filter: 'blur(50px)' }}
           animate={{ scale: [1, 1.25, 1], opacity: [0.5, 0.9, 0.5] }}
           transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
           className="absolute bottom-1/4 right-1/5 w-64 h-64 rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.06) 0%, transparent 70%)', filter: 'blur(50px)' }}
-          animate={{ scale: [1.2, 1, 1.2], opacity: [0.8, 0.4, 0.8] }}
+          style={{ background: 'radial-gradient(circle, rgba(255,149,0,0.05) 0%, transparent 70%)', filter: 'blur(50px)' }}
+          animate={{ scale: [1.2, 1, 1.2], opacity: [0.7, 0.4, 0.7] }}
           transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute top-2/3 left-1/3 w-72 h-72 rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(169,209,113,0.04) 0%, transparent 70%)', filter: 'blur(60px)' }}
+          animate={{ scale: [1, 1.4, 1], opacity: [0.4, 0.8, 0.4] }}
+          transition={{ duration: 13, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
         />
       </div>
     </>

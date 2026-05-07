@@ -2,11 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface ProgressBarProps {
-  active: boolean;
-}
-
-export default function ProgressBar({ active }: ProgressBarProps) {
+export default function ProgressBar({ active }: { active: boolean }) {
   return (
     <AnimatePresence>
       {active && (
@@ -17,23 +13,20 @@ export default function ProgressBar({ active }: ProgressBarProps) {
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className="h-full"
             style={{
-              background: 'linear-gradient(90deg, #A855F7, #06B6D4, #EC4899, #A855F7)',
-              backgroundSize: '200% 100%',
+              height: '100%',
+              transformOrigin: 'left',
+              background: 'linear-gradient(90deg, #5AC8FA, #34C759, #A9D171, #FF9500, #5AC8FA)',
+              backgroundSize: '300% 100%',
+              boxShadow: '0 0 8px rgba(90,200,250,0.7)',
             }}
             animate={{
-              backgroundPosition: ['0% 50%', '200% 50%'],
-              scaleX: [0.1, 0.7, 0.9, 1],
+              backgroundPosition: ['0% 50%', '300% 50%'],
+              scaleX: [0.05, 0.6, 0.85, 1],
             }}
             transition={{
-              backgroundPosition: { duration: 1.5, repeat: Infinity, ease: 'linear' },
-              scaleX: { duration: 3, ease: 'easeInOut' },
-            }}
-            style={{
-              transformOrigin: 'left',
-              background: 'linear-gradient(90deg, #A855F7, #06B6D4, #EC4899)',
-              boxShadow: '0 0 10px #A855F7, 0 0 20px #06B6D460',
+              backgroundPosition: { duration: 1.8, repeat: Infinity, ease: 'linear' },
+              scaleX: { duration: 3.5, ease: 'easeInOut' },
             }}
           />
         </motion.div>

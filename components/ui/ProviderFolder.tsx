@@ -105,13 +105,13 @@ export default function ProviderFolder({ provider, models, selectedModel, onSele
                   onClick={() => onSelect(m.id)}
                   className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-left transition-colors ${
                     selectedModel === m.id
-                      ? 'bg-neon-purple/15 border border-neon-purple/25'
+                      ? 'bg-brand-blue/15 border border-brand-blue/25'
                       : 'hover:bg-white/5'
                   }`}
                 >
                   <span className="flex-1 text-xs text-white/75 truncate">{m.name}</span>
                   {m.free && (
-                    <span className="text-[9px] px-1 py-0.5 rounded bg-neon-cyan/15 text-neon-cyan border border-neon-cyan/20 flex-shrink-0">
+                    <span className="text-[9px] px-1 py-0.5 rounded bg-brand-green/15 text-brand-green border border-brand-green/20 flex-shrink-0">
                       GRATIS
                     </span>
                   )}

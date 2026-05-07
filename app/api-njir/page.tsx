@@ -75,8 +75,8 @@ const BYOK_PROVIDERS = [
 ];
 
 const TABS = [
-  { key: 'openrouter', label: 'OpenRouter', icon: <Key size={14} />, color: 'text-neon-purple' },
-  { key: 'cloudflare', label: 'Cloudflare', icon: <Cloud size={14} />, color: 'text-neon-cyan' },
+  { key: 'openrouter', label: 'OpenRouter', icon: <Key size={14} />, color: 'text-brand-blue' },
+  { key: 'cloudflare', label: 'Cloudflare', icon: <Cloud size={14} />, color: 'text-brand-blue' },
   { key: 'bailian', label: 'Alibaba Bailian', icon: <Server size={14} />, color: 'text-yellow-400' },
   { key: 'custom', label: 'Custom (Cline)', icon: <Cpu size={14} />, color: 'text-pink-400' },
 ];
@@ -124,8 +124,8 @@ export default function ApiNjirPage() {
 
       {/* Background */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-neon-purple/6 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-neon-cyan/5 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-brand-blue/6 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-brand-blue/5 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-0 w-64 h-64 bg-pink-500/4 rounded-full blur-3xl" />
       </div>
 
@@ -164,7 +164,7 @@ export default function ApiNjirPage() {
                 className="flex items-center gap-2 mt-1"
               >
                 <p className="text-gray-500 text-sm">Kendalikan Semua Kunci API di Satu Tempat</p>
-                <span className="px-1.5 py-0.5 bg-neon-purple/20 border border-neon-purple/30 rounded-full text-[9px] text-neon-purple font-bold tracking-wider">
+                <span className="px-1.5 py-0.5 bg-brand-blue/20 border border-brand-blue/30 rounded-full text-[9px] text-brand-blue font-bold tracking-wider">
                   AES-GCM ENCRYPTED
                 </span>
               </motion.div>
@@ -179,8 +179,8 @@ export default function ApiNjirPage() {
           transition={{ delay: 0.06 }}
           className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8"
         >
-          <StatCard label="Provider Aktif" value={configuredCount} color="text-neon-purple" />
-          <StatCard label="BYOK Keys" value={byokCount} color="text-neon-cyan" />
+          <StatCard label="Provider Aktif" value={configuredCount} color="text-brand-blue" />
+          <StatCard label="BYOK Keys" value={byokCount} color="text-brand-blue" />
           <StatCard label="Custom Endpoints" value={store.customProviders.length} color="text-pink-400" />
           <StatCard label="Total Dukungan" value="300+" color="text-yellow-400" />
         </motion.div>
@@ -232,13 +232,13 @@ export default function ApiNjirPage() {
               {/* Main key */}
               <section>
                 <div className="flex items-center gap-2 mb-3">
-                  <Sparkles size={14} className="text-neon-purple" />
+                  <Sparkles size={14} className="text-brand-blue" />
                   <h2 className="text-sm font-bold text-white font-heading">OpenRouter — API Key Utama</h2>
                   <a
                     href="https://openrouter.ai/settings/keys"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="ml-auto text-[11px] text-gray-600 hover:text-neon-cyan flex items-center gap-1 transition-colors"
+                    className="ml-auto text-[11px] text-gray-600 hover:text-brand-blue flex items-center gap-1 transition-colors"
                   >
                     Dapatkan Key <ExternalLink size={10} />
                   </a>
@@ -319,22 +319,22 @@ export default function ApiNjirPage() {
               className="space-y-5"
             >
               <div className="flex items-center gap-2">
-                <Cloud size={14} className="text-neon-cyan" />
+                <Cloud size={14} className="text-brand-blue" />
                 <h2 className="text-sm font-bold text-white font-heading">Cloudflare Workers AI</h2>
                 <a
                   href="https://developers.cloudflare.com/workers-ai/get-started/rest-api/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="ml-auto text-[11px] text-gray-600 hover:text-neon-cyan flex items-center gap-1 transition-colors"
+                  className="ml-auto text-[11px] text-gray-600 hover:text-brand-blue flex items-center gap-1 transition-colors"
                 >
                   Panduan <ExternalLink size={10} />
                 </a>
               </div>
 
-              <div className="glass border border-neon-cyan/15 rounded-2xl p-4 bg-neon-cyan/[0.03] text-xs text-gray-500 leading-relaxed space-y-1.5">
+              <div className="glass border border-brand-blue/15 rounded-2xl p-4 bg-brand-blue/[0.03] text-xs text-gray-500 leading-relaxed space-y-1.5">
                 <p><strong className="text-gray-300">Cara mendapatkan credentials:</strong></p>
                 <ol className="list-decimal list-inside space-y-1 text-gray-600">
-                  <li>Buka <a href="https://dash.cloudflare.com/" target="_blank" rel="noopener noreferrer" className="text-neon-cyan hover:underline">Dashboard Cloudflare</a></li>
+                  <li>Buka <a href="https://dash.cloudflare.com/" target="_blank" rel="noopener noreferrer" className="text-brand-blue hover:underline">Dashboard Cloudflare</a></li>
                   <li>Menu kiri → Workers AI → <strong className="text-gray-400">Use REST API</strong></li>
                   <li>Klik <strong className="text-gray-400">Create API Token</strong> → pilih template <em>Workers AI</em></li>
                   <li>Copy <strong className="text-gray-400">Account ID</strong> dari sidebar kanan dashboard</li>
@@ -370,8 +370,8 @@ export default function ApiNjirPage() {
                 }}
               />
 
-              <div className="glass border border-neon-cyan/20 rounded-2xl p-4">
-                <p className="text-[11px] text-neon-cyan font-semibold mb-2">Model yang tersedia</p>
+              <div className="glass border border-brand-blue/20 rounded-2xl p-4">
+                <p className="text-[11px] text-brand-blue font-semibold mb-2">Model yang tersedia</p>
                 <div className="flex flex-wrap gap-1.5">
                   {[
                     '@cf/meta/llama-3.1-8b-instruct',
@@ -382,7 +382,7 @@ export default function ApiNjirPage() {
                     '@cf/google/gemma-7b-it-lora',
                     '@cf/microsoft/phi-2',
                   ].map((m) => (
-                    <span key={m} className="px-2 py-0.5 text-[10px] bg-neon-cyan/10 border border-neon-cyan/20 rounded-lg text-neon-cyan/80 font-mono">
+                    <span key={m} className="px-2 py-0.5 text-[10px] bg-brand-blue/10 border border-brand-blue/20 rounded-lg text-brand-blue/80 font-mono">
                       {m}
                     </span>
                   ))}

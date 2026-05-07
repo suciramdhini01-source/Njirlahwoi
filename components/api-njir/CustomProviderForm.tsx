@@ -107,7 +107,7 @@ export default function CustomProviderForm({ open, onClose, onAdd }: CustomProvi
                     <button
                       key={p.name}
                       onClick={() => applyPreset(p)}
-                      className="px-2.5 py-1 text-[11px] rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:border-neon-purple/40 hover:text-white hover:bg-neon-purple/10 transition-all"
+                      className="px-2.5 py-1 text-[11px] rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:border-brand-blue/40 hover:text-white hover:bg-brand-blue/10 transition-all"
                     >
                       {p.name}
                     </button>
@@ -124,7 +124,7 @@ export default function CustomProviderForm({ open, onClose, onAdd }: CustomProvi
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Cline Local, SiliconFlow, ..."
-                  className="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-xs text-white/80 placeholder-gray-700 outline-none focus:border-neon-purple/40 transition-colors"
+                  className="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-xs text-white/80 placeholder-gray-700 outline-none focus:border-brand-blue/40 transition-colors"
                 />
               </div>
 
@@ -138,14 +138,14 @@ export default function CustomProviderForm({ open, onClose, onAdd }: CustomProvi
                     value={baseUrl}
                     onChange={(e) => { setBaseUrl(e.target.value); setTestStatus('idle'); }}
                     placeholder="https://api.example.com/v1"
-                    className="flex-1 bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-xs text-white/80 placeholder-gray-700 outline-none focus:border-neon-purple/40 transition-colors font-mono"
+                    className="flex-1 bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-xs text-white/80 placeholder-gray-700 outline-none focus:border-brand-blue/40 transition-colors font-mono"
                   />
                   <motion.button
                     whileHover={{ scale: 1.04 }}
                     whileTap={{ scale: 0.94 }}
                     onClick={handleTest}
                     disabled={!baseUrl.trim() || testStatus === 'testing'}
-                    className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-400 hover:border-neon-cyan/30 hover:text-neon-cyan disabled:opacity-40 transition-all flex items-center gap-1.5"
+                    className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-400 hover:border-brand-green/30 hover:text-brand-green disabled:opacity-40 transition-all flex items-center gap-1.5"
                   >
                     {testStatus === 'testing' ? (
                       <Loader2 size={11} className="animate-spin" />
@@ -164,7 +164,7 @@ export default function CustomProviderForm({ open, onClose, onAdd }: CustomProvi
                 <label className="text-[11px] text-gray-500 mb-1.5 flex items-center gap-1.5">
                   <Lock size={10} /> API Key <span className="text-gray-700">(opsional)</span>
                 </label>
-                <div className="flex items-center gap-2 bg-black/30 border border-white/10 rounded-xl px-3 py-2 focus-within:border-neon-purple/40 transition-colors">
+                <div className="flex items-center gap-2 bg-black/30 border border-white/10 rounded-xl px-3 py-2 focus-within:border-brand-blue/40 transition-colors">
                   <input
                     type={showKey ? 'text' : 'password'}
                     value={apiKey}
@@ -187,7 +187,7 @@ export default function CustomProviderForm({ open, onClose, onAdd }: CustomProvi
                   value={modelId}
                   onChange={(e) => setModelId(e.target.value)}
                   placeholder="meta-llama/llama-3.1-8b-instruct"
-                  className="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-xs text-white/80 placeholder-gray-700 outline-none focus:border-neon-purple/40 transition-colors font-mono"
+                  className="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-2 text-xs text-white/80 placeholder-gray-700 outline-none focus:border-brand-blue/40 transition-colors font-mono"
                 />
               </div>
 
@@ -197,7 +197,7 @@ export default function CustomProviderForm({ open, onClose, onAdd }: CustomProvi
                 whileTap={{ scale: 0.97 }}
                 onClick={handleAdd}
                 disabled={!name.trim() || !baseUrl.trim() || saving}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-neon-purple/15 border border-neon-purple/30 text-neon-purple font-medium text-sm hover:bg-neon-purple/25 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-brand-blue/15 border border-brand-blue/30 text-brand-blue font-medium text-sm hover:bg-brand-blue/25 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >
                 {saving ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
                 Tambah Provider

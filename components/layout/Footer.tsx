@@ -2,12 +2,9 @@
 
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import ScrollReveal from '@/components/ui/ScrollReveal';
 
-/* ── Unicorn walking along an SVG path (anime.js) ── */
 function WalkingUnicorn() {
   const unicornRef = useRef<HTMLSpanElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -16,7 +13,6 @@ function WalkingUnicorn() {
         const animeModule = await import('animejs');
         const anime = (animeModule as any).default ?? animeModule;
         if (cancelled || !unicornRef.current) return;
-
         anime({
           targets: unicornRef.current,
           translateX: ['-8px', '220px'],
@@ -33,14 +29,9 @@ function WalkingUnicorn() {
   }, []);
 
   return (
-    <div ref={containerRef} className="relative h-8 w-56 mx-auto overflow-hidden">
-      {/* Track line */}
-      <div className="absolute bottom-1 left-0 right-0 h-px bg-gradient-to-r from-transparent via-neon-purple/30 to-transparent" />
-      <span
-        ref={unicornRef}
-        className="absolute bottom-1.5 text-lg select-none"
-        style={{ willChange: 'transform' }}
-      >
+    <div className="relative h-8 w-56 mx-auto overflow-hidden">
+      <div className="absolute bottom-1 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-pistachio/30 to-transparent" />
+      <span ref={unicornRef} className="absolute bottom-1.5 text-lg select-none" style={{ willChange: 'transform' }}>
         🦄
       </span>
     </div>
@@ -49,37 +40,30 @@ function WalkingUnicorn() {
 
 export default function Footer() {
   const year = new Date().getFullYear();
-
   return (
-    <footer className="mt-auto border-t border-white/10 bg-black/40 backdrop-blur-md py-6 text-center flex-shrink-0">
+    <footer className="mt-auto border-t border-white/[0.06] bg-[#0A0A14]/60 backdrop-blur-md py-6 text-center flex-shrink-0">
       <WalkingUnicorn />
-
-      <ScrollReveal delay={0.1}>
-        <p className="text-lg font-bold text-neon-pink flex items-center justify-center gap-2 font-heading mt-3">
-          Dibuat dengan{' '}
-          <motion.span
-            animate={{ scale: [1, 1.4, 1] }}
-            transition={{ duration: 0.9, repeat: Infinity, ease: 'easeInOut' }}
-            className="text-red-500 inline-block"
-          >
-            ❤️
-          </motion.span>{' '}
-          oleh{' '}
-          <motion.span
-            whileHover={{ color: '#A855F7', textShadow: '0 0 12px rgba(168,85,247,0.6)' }}
-            className="underline decoration-neon-purple decoration-2 cursor-default"
-          >
-            Andikaa Saputraa
-          </motion.span>
-        </p>
-      </ScrollReveal>
-
-      <ScrollReveal delay={0.18}>
-        <p className="text-sm text-gray-400 mt-1">
-          Membangun masa depan AI yang bebas, tanpa batas, ala kadarnya tapi njir lah keren.
-        </p>
-        <p className="text-xs text-gray-600 mt-2">© {year} NJIRLAH AI</p>
-      </ScrollReveal>
+      <p className="text-base font-bold flex items-center justify-center gap-2 font-heading mt-3 text-white/80">
+        Dibuat dengan{' '}
+        <motion.span
+          animate={{ scale: [1, 1.4, 1] }}
+          transition={{ duration: 0.9, repeat: Infinity, ease: 'easeInOut' }}
+          className="text-brand-red inline-block"
+        >
+          ❤️
+        </motion.span>{' '}
+        oleh{' '}
+        <motion.span
+          whileHover={{ color: '#5AC8FA', textShadow: '0 0 12px rgba(90,200,250,0.5)' }}
+          className="underline decoration-brand-blue decoration-2 cursor-default text-white/70"
+        >
+          Andikaa Saputraa
+        </motion.span>
+      </p>
+      <p className="text-sm text-white/25 mt-1">
+        Platform chat AI multi-model — gratis, bebas, dan njir lah keren.
+      </p>
+      <p className="text-xs text-white/15 mt-2">© {year} NJIRLAH AI</p>
     </footer>
   );
 }
