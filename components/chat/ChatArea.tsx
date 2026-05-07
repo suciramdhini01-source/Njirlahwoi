@@ -10,12 +10,12 @@ import { Message, useChatStore } from '@/store/chat-store';
 import { useApiKeyStore } from '@/store/api-key-store';
 
 const PROMPTS = [
-  'Jelaskan konsep machine learning dengan mudah',
-  'Tulis kode Python untuk bubble sort',
-  'Apa perbedaan AI, ML, dan Deep Learning?',
-  'Bantu saya buat resume profesional',
-  'Bagaimana cara deploy app ke Vercel?',
-  'Tulis puisi tentang teknologi masa depan',
+  'Jelaskan machine learning dengan sederhana',
+  'Tulis kode Python bubble sort',
+  'Bedanya AI, ML, dan Deep Learning?',
+  'Bantu buat resume profesional',
+  'Cara deploy app ke Vercel?',
+  'Tulis puisi teknologi masa depan',
 ];
 
 interface ChatAreaProps {
@@ -29,11 +29,11 @@ interface ChatAreaProps {
 
 const containerVariants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.06 } },
+  visible: { transition: { staggerChildren: 0.05 } },
 };
 
 const promptVariants = {
-  hidden: { opacity: 0, y: 12, scale: 0.95 },
+  hidden: { opacity: 0, y: 10, scale: 0.95 },
   visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring' as const, damping: 22, stiffness: 300 } },
 };
 
@@ -53,13 +53,12 @@ export default function ChatArea({
     setShowScrollBtn(false);
   }, []);
 
-  // Track if user scrolled up manually
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     const onScroll = () => {
       const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
-      const scrolledUp = distFromBottom > 120;
+      const scrolledUp = distFromBottom > 100;
       setUserScrolledUp(scrolledUp);
       setShowScrollBtn(scrolledUp && messages.length > 0);
     };
@@ -67,23 +66,22 @@ export default function ChatArea({
     return () => el.removeEventListener('scroll', onScroll);
   }, [messages.length]);
 
-  // Auto-scroll during streaming unless user scrolled up
   useEffect(() => {
     if (!userScrolledUp) scrollToBottom('smooth');
   }, [streamingContent, userScrolledUp, scrollToBottom]);
 
-  // Scroll to bottom on new messages (when not scrolled up)
   useEffect(() => {
     if (!userScrolledUp) scrollToBottom('smooth');
   }, [messages.length, userScrolledUp, scrollToBottom]);
 
+  /* ── Empty state ── */
   if (messages.length === 0 && !isStreaming) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center overflow-y-auto">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 text-center overflow-y-auto">
         <motion.div
-          animate={{ y: [0, -14, 0], rotate: [0, 5, -5, 0] }}
+          animate={{ y: [0, -12, 0], rotate: [0, 5, -5, 0] }}
           transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-          className="text-7xl mb-5 select-none"
+          className="text-5xl sm:text-7xl mb-4 select-none"
         >
           🦄
         </motion.div>
@@ -91,7 +89,7 @@ export default function ChatArea({
         <motion.h2
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-2xl font-black font-heading gradient-text mb-1.5"
+          className="text-xl sm:text-2xl font-black font-heading gradient-text mb-1"
         >
           NJIRLAH AI
         </motion.h2>
@@ -99,7 +97,7 @@ export default function ChatArea({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.15 }}
-          className="text-gray-500 text-sm mb-1"
+          className="text-gray-500 text-xs sm:text-sm mb-1"
         >
           Chat AI Tersesat, Bebas Pake Kunci Sendiri
         </motion.p>
@@ -109,9 +107,11 @@ export default function ChatArea({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.25 }}
-            className="text-[11px] text-gray-700 mt-1"
+            className="text-[10px] sm:text-[11px] text-gray-700 mt-1"
           >
-            {selectedProvider === 'cloudflare' ? '☁️ Cloudflare siap · Langsung mulai!' : '✓ OpenRouter tersambung · Pilih model dan mulai!'}
+            {selectedProvider === 'cloudflare'
+              ? '☁️ Cloudflare siap · Langsung mulai!'
+              : '✓ OpenRouter tersambung · Pilih model dan mulai!'}
           </motion.p>
         ) : (
           <motion.button
@@ -128,18 +128,18 @@ export default function ChatArea({
           </motion.button>
         )}
 
-        {/* Prompt suggestions */}
+        {/* Prompt suggestions — 1 col mobile, 2 col tablet+ */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="mt-8 grid grid-cols-2 gap-2 max-w-lg w-full"
+          className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-lg w-full"
         >
           {PROMPTS.map((prompt, i) => (
             <motion.button
               key={i}
               variants={promptVariants}
-              whileHover={{ scale: 1.03, borderColor: 'rgba(168,85,247,0.4)' }}
+              whileHover={{ scale: 1.02, borderColor: 'rgba(168,85,247,0.4)' }}
               whileTap={{ scale: 0.97 }}
               onClick={() => onSend(prompt)}
               className="glass rounded-xl p-3 text-xs text-gray-400 hover:text-white transition-all text-left border border-white/5 hover:bg-white/5"
@@ -155,7 +155,7 @@ export default function ChatArea({
 
   return (
     <div className="relative flex-1 min-h-0 flex flex-col">
-      <div ref={scrollRef} className="flex-1 overflow-y-auto py-4">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto py-3 sm:py-4">
         <AnimatePresence initial={false}>
           {messages.map((msg) => (
             <ChatBubble
@@ -179,7 +179,7 @@ export default function ChatArea({
         )}
         {isStreaming && !streamingContent && <SkeletonBubble />}
 
-        <div ref={bottomRef} className="h-1" />
+        <div ref={bottomRef} className="h-2" />
       </div>
 
       {/* Scroll to bottom button */}
@@ -193,8 +193,8 @@ export default function ChatArea({
             onClick={() => scrollToBottom()}
             className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/15 text-xs text-gray-300 hover:text-white hover:border-neon-purple/30 shadow-xl transition-colors z-10"
           >
-            <ArrowDown size={12} className="text-neon-purple" />
-            Scroll ke bawah
+            <ArrowDown size={11} className="text-neon-purple" />
+            <span className="hidden sm:inline">Scroll ke bawah</span>
           </motion.button>
         )}
       </AnimatePresence>

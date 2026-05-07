@@ -27,9 +27,9 @@ export default function MultiStateBadge({ state, provider }: MultiStateBadgeProp
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.8, y: 4 }}
         transition={{ type: 'spring', damping: 22, stiffness: 360 }}
-        className={`flex items-center gap-1.5 px-2 py-1 rounded-full glass border border-white/10 ${cfg.color}`}
+        className={`flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-full sm:rounded-xl glass border border-white/10 ${cfg.color} flex-shrink-0`}
       >
-        <div className="relative">
+        <div className="relative flex-shrink-0">
           <div className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
           {cfg.pulse && (
             <motion.div
@@ -39,7 +39,8 @@ export default function MultiStateBadge({ state, provider }: MultiStateBadgeProp
             />
           )}
         </div>
-        <span className="text-[10px] font-medium whitespace-nowrap">
+        {/* Text hidden on mobile, visible on sm+ */}
+        <span className="hidden sm:inline text-[10px] font-medium whitespace-nowrap">
           {provider ? `${provider} · ${cfg.label}` : cfg.label}
         </span>
       </motion.div>

@@ -36,9 +36,9 @@ function StaggerWords({ text }: { text: string }) {
       {words.map((word, i) => (
         <motion.span
           key={i}
-          initial={{ opacity: 0, y: 4 }}
+          initial={{ opacity: 0, y: 3 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: Math.min(i * 0.012, 1.2), duration: 0.18 }}
+          transition={{ delay: Math.min(i * 0.01, 0.8), duration: 0.15 }}
           className="inline-block mr-[0.25em]"
         >
           {word}
@@ -48,16 +48,18 @@ function StaggerWords({ text }: { text: string }) {
   );
 }
 
-/* ─── Error bubble ─────────────────────────────────────────────── */
 function ErrorBubble({ content, onRetry }: { content: string; onRetry?: () => void }) {
-  // Strip leading emoji/markdown error prefix for cleaner display
-  const cleaned = content.replace(/^[❌⚠️*_\s]+Error[*_:\s]*/i, '').trim();
+  const cleaned = content
+    .replace(/^[❌⚠️]+\s*/, '')
+    .replace(/^\*\*Error:\*\*\s*/i, '')
+    .trim();
+
   return (
-    <div className="rounded-2xl px-4 py-3 bg-red-500/8 border border-red-500/20 backdrop-blur-sm">
+    <div className="rounded-2xl px-4 py-3 bg-red-500/8 border border-red-500/20">
       <div className="flex items-start gap-2.5">
-        <AlertTriangle size={14} className="text-red-400 flex-shrink-0 mt-0.5" />
+        <AlertTriangle size={13} className="text-red-400 flex-shrink-0 mt-0.5" />
         <div className="min-w-0">
-          <p className="text-xs font-medium text-red-300 mb-0.5">Oops, ada masalah</p>
+          <p className="text-xs font-semibold text-red-300 mb-0.5">Ada masalah</p>
           <p className="text-xs text-red-400/80 leading-relaxed break-words">{cleaned || content}</p>
         </div>
       </div>
@@ -79,9 +81,11 @@ function ErrorBubble({ content, onRetry }: { content: string; onRetry?: () => vo
 export default function ChatBubble({ message, onRegenerate, onLike, streaming }: ChatBubbleProps) {
   const [copied, setCopied] = useState(false);
   const isUser = message.role === 'user';
-  const isLong = message.content.split(' ').length > 30;
+  const wordCount = message.content.split(' ').length;
+  const isLong = wordCount > 25;
   const isError = message.isError ||
-    (message.role === 'assistant' && (message.content.startsWith('❌') || message.content.startsWith('⚠️')));
+    (message.role === 'assistant' &&
+      (message.content.startsWith('❌') || message.content.startsWith('⚠️')));
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(message.content);
@@ -92,15 +96,15 @@ export default function ChatBubble({ message, onRegenerate, onLike, streaming }:
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 16, scale: 0.97 }}
+      initial={{ opacity: 0, y: 14, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -8, scale: 0.97 }}
       transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-      className={`flex items-start gap-3 px-4 py-2 group ${isUser ? 'flex-row-reverse' : ''}`}
+      className={`flex items-start gap-2 sm:gap-3 px-3 sm:px-4 py-2 group ${isUser ? 'flex-row-reverse' : ''}`}
     >
       {/* Avatar */}
       <div className="relative flex-shrink-0">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm select-none ${
+        <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm select-none ${
           isUser
             ? 'bg-gradient-to-br from-neon-pink to-neon-purple'
             : isError
@@ -113,45 +117,45 @@ export default function ChatBubble({ message, onRegenerate, onLike, streaming }:
       </div>
 
       {/* Content */}
-      <div className={`max-w-[78%] flex flex-col gap-1 ${isUser ? 'items-end' : 'items-start'}`}>
-
+      <div className={`flex flex-col gap-1 ${isUser ? 'items-end' : 'items-start'}`}
+        style={{ maxWidth: 'min(78%, 600px)' }}
+      >
         {/* Bubble */}
-        <motion.div layout className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-          isUser
-            ? 'bg-gradient-to-br from-neon-purple/30 to-neon-pink/20 border border-neon-purple/30 rounded-tr-sm'
-            : isError
-            ? '' /* error component handles its own container */
-            : 'glass rounded-bl-sm'
-        }`}>
+        <motion.div
+          layout
+          className={`rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 text-[13px] sm:text-sm leading-relaxed ${
+            isUser
+              ? 'bg-gradient-to-br from-neon-purple/30 to-neon-pink/20 border border-neon-purple/30 rounded-tr-sm'
+              : isError
+              ? ''
+              : 'glass rounded-bl-sm'
+          }`}
+        >
           {isUser ? (
-            <p className="text-white/90 whitespace-pre-wrap">{message.content}</p>
+            <p className="text-white/90 whitespace-pre-wrap break-words">{message.content}</p>
           ) : isError ? (
             <ErrorBubble content={message.content} onRetry={onRegenerate} />
           ) : streaming && isLong ? (
-            <div className="prose prose-invert prose-sm max-w-none">
+            <div className="prose prose-invert prose-sm max-w-none break-words">
               <StaggerWords text={message.content} />
             </div>
           ) : (
-            <div className="prose prose-invert prose-sm max-w-none">
+            <div className="prose prose-invert prose-sm max-w-none break-words overflow-x-auto">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
             </div>
           )}
         </motion.div>
 
-        {/* Actions row — always visible on mobile, hover on desktop */}
+        {/* Actions */}
         {!streaming && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className={`flex items-center gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity duration-150 ${isUser ? 'flex-row-reverse' : ''}`}
-          >
+          <div className={`flex items-center gap-0.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-150 ${isUser ? 'flex-row-reverse' : ''}`}>
             {/* Copy */}
             <motion.button
               whileHover={{ scale: 1.15 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleCopy}
               title="Salin"
-              className="p-1.5 rounded-lg text-gray-500 hover:text-neon-cyan hover:bg-white/5 transition-colors"
+              className="p-1.5 rounded-lg text-gray-600 hover:text-neon-cyan hover:bg-white/5 transition-colors"
             >
               <AnimatePresence mode="wait">
                 {copied ? (
@@ -173,8 +177,8 @@ export default function ChatBubble({ message, onRegenerate, onLike, streaming }:
                 whileTap={{ scale: 0.9 }}
                 transition={{ type: 'spring', damping: 15 }}
                 onClick={onRegenerate}
-                title="Generate ulang"
-                className="p-1.5 rounded-lg text-gray-500 hover:text-neon-purple hover:bg-white/5 transition-colors"
+                title="Ulangi respons"
+                className="p-1.5 rounded-lg text-gray-600 hover:text-neon-purple hover:bg-white/5 transition-colors"
               >
                 <RefreshCw size={11} />
               </motion.button>
@@ -186,12 +190,10 @@ export default function ChatBubble({ message, onRegenerate, onLike, streaming }:
                 <motion.button
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.85 }}
-                  onClick={() => {
-                    onLike(message.liked === true ? null : true);
-                  }}
+                  onClick={() => onLike(message.liked === true ? null : true)}
                   title="Bagus"
                   className={`p-1.5 rounded-lg transition-colors ${
-                    message.liked === true ? 'text-neon-cyan bg-neon-cyan/10' : 'text-gray-500 hover:text-neon-cyan hover:bg-white/5'
+                    message.liked === true ? 'text-neon-cyan bg-neon-cyan/10' : 'text-gray-600 hover:text-neon-cyan hover:bg-white/5'
                   }`}
                 >
                   <ThumbsUp size={11} />
@@ -199,12 +201,10 @@ export default function ChatBubble({ message, onRegenerate, onLike, streaming }:
                 <motion.button
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.85 }}
-                  onClick={() => {
-                    onLike(message.liked === false ? null : false);
-                  }}
+                  onClick={() => onLike(message.liked === false ? null : false)}
                   title="Kurang bagus"
                   className={`p-1.5 rounded-lg transition-colors ${
-                    message.liked === false ? 'text-neon-pink bg-neon-pink/10' : 'text-gray-500 hover:text-neon-pink hover:bg-white/5'
+                    message.liked === false ? 'text-neon-pink bg-neon-pink/10' : 'text-gray-600 hover:text-neon-pink hover:bg-white/5'
                   }`}
                 >
                   <ThumbsDown size={11} />
@@ -215,10 +215,10 @@ export default function ChatBubble({ message, onRegenerate, onLike, streaming }:
             {/* Model tag */}
             {message.model && (
               <span className="text-[9px] text-gray-700 ml-1 font-mono hidden sm:block">
-                {message.model.split('/').pop()?.split(':')[0]?.slice(0, 24)}
+                {message.model.split('/').pop()?.split(':')[0]?.slice(0, 22)}
               </span>
             )}
-          </motion.div>
+          </div>
         )}
       </div>
     </motion.div>

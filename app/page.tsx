@@ -91,7 +91,9 @@ export default function HomePage() {
     let chatId = activeChatId;
     if (!chatId) chatId = createChat();
 
-    const isFirstMessage = (chats.find((c) => c.id === chatId)?.messages.length ?? 0) === 0;
+    // Check if this is the first message BEFORE adding (length === 0 means no messages yet)
+    const existingChat = chats.find((c) => c.id === chatId);
+    const isFirstMessage = (existingChat?.messages.length ?? 0) === 0;
 
     addMessage(chatId!, { role: 'user', content });
     setIsStreaming(true);

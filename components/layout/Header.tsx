@@ -44,7 +44,7 @@ function EditableTitle({ chatId, title }: { chatId: string; title: string }) {
           if (e.key === 'Enter') commit();
           if (e.key === 'Escape') { setValue(title); setEditing(false); }
         }}
-        className="bg-white/5 border border-neon-purple/30 rounded-lg px-2 py-0.5 text-sm text-white font-medium outline-none max-w-[260px] w-full"
+        className="bg-white/5 border border-neon-purple/30 rounded-lg px-2 py-0.5 text-xs sm:text-sm text-white font-medium outline-none w-full max-w-[160px] sm:max-w-[220px]"
         maxLength={60}
       />
     );
@@ -53,20 +53,29 @@ function EditableTitle({ chatId, title }: { chatId: string; title: string }) {
   return (
     <motion.button
       key={title}
-      initial={{ opacity: 0, y: -8 }}
+      initial={{ opacity: 0, y: -6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', damping: 22, stiffness: 300 }}
       onClick={() => setEditing(true)}
-      className="group flex items-center gap-1.5 text-sm font-medium text-white/80 hover:text-white transition-colors max-w-[260px]"
+      className="group flex items-center gap-1 text-xs sm:text-sm font-medium text-white/75 hover:text-white transition-colors max-w-[130px] sm:max-w-[220px]"
     >
       <span className="truncate">{title === 'New Chat' ? 'Chat Baru' : title}</span>
-      <Pencil size={11} className="text-gray-700 group-hover:text-neon-purple transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100" />
+      <Pencil size={10} className="text-gray-700 group-hover:text-neon-purple transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100" />
     </motion.button>
   );
 }
 
 /* ── 3-dot context menu ──────────────────────────────────────────── */
-function ChatMenu({ chatId, onRename, onDelete }: { chatId: string; onRename: () => void; onDelete: () => void }) {
+function ChatMenu({
+  chatId, isPinned, isFavorited, onPin, onFav, onDelete,
+}: {
+  chatId: string;
+  isPinned?: boolean;
+  isFavorited?: boolean;
+  onPin: () => void;
+  onFav: () => void;
+  onDelete: () => void;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -79,9 +88,27 @@ function ChatMenu({ chatId, onRename, onDelete }: { chatId: string; onRename: ()
   }, []);
 
   const items = [
-    { icon: <Pencil size={12} />, label: 'Ubah Nama', action: () => { onRename(); setOpen(false); } },
-    { icon: <Download size={12} />, label: 'Ekspor Chat', action: () => { setOpen(false); /* TODO */ } },
-    { icon: <Trash2 size={12} />, label: 'Hapus Chat', action: () => { onDelete(); setOpen(false); }, danger: true },
+    {
+      icon: <Pin size={12} className={isPinned ? 'fill-neon-purple text-neon-purple' : ''} />,
+      label: isPinned ? 'Lepas Pin' : 'Sematkan Chat',
+      action: () => { onPin(); setOpen(false); },
+    },
+    {
+      icon: <Star size={12} className={isFavorited ? 'fill-yellow-400 text-yellow-400' : ''} />,
+      label: isFavorited ? 'Hapus Favorit' : 'Tambah Favorit',
+      action: () => { onFav(); setOpen(false); },
+    },
+    {
+      icon: <Download size={12} />,
+      label: 'Ekspor Chat',
+      action: () => setOpen(false),
+    },
+    {
+      icon: <Trash2 size={12} />,
+      label: 'Hapus Chat',
+      action: () => { onDelete(); setOpen(false); },
+      danger: true,
+    },
   ];
 
   return (
@@ -123,49 +150,46 @@ function ChatMenu({ chatId, onRename, onDelete }: { chatId: string; onRename: ()
   );
 }
 
-/* ── Logo (kept from original) ───────────────────────────────────── */
+/* ── Logo ─────────────────────────────────────────────────────────── */
 function Logo() {
   const [hovered, setHovered] = useState(false);
   const [easterEgg, setEasterEgg] = useState(false);
   const [clicks, setClicks] = useState(0);
-  const svgRef = useRef<SVGSVGElement>(null);
-
-  useEffect(() => {
-    if (!hovered || !svgRef.current) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const animeModule = await import('animejs');
-        const anime = (animeModule as any).default ?? animeModule;
-        if (cancelled || !svgRef.current) return;
-        const path = svgRef.current.querySelector('rect.neon-outline');
-        if (!path) return;
-        anime({ targets: path, strokeDashoffset: [anime.setDashoffset(path), 0], duration: 800, easing: 'easeInOutCubic' });
-      } catch {}
-    })();
-    return () => { cancelled = true; };
-  }, [hovered]);
 
   return (
     <motion.button
-      onClick={() => { const n = clicks + 1; setClicks(n); if (n >= 3) { setEasterEgg(true); setClicks(0); setTimeout(() => setEasterEgg(false), 3200); } }}
+      onClick={() => {
+        const n = clicks + 1;
+        setClicks(n);
+        if (n >= 3) { setEasterEgg(true); setClicks(0); setTimeout(() => setEasterEgg(false), 3200); }
+      }}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      className="relative flex items-center gap-2 select-none flex-shrink-0"
+      whileHover={{ scale: 1.06 }}
+      whileTap={{ scale: 0.94 }}
+      className="relative flex items-center gap-1.5 select-none flex-shrink-0"
     >
-      <svg ref={svgRef} className="absolute -inset-1.5 pointer-events-none overflow-visible" style={{ width: 'calc(100% + 12px)', height: 'calc(100% + 12px)' }}>
-        <rect className="neon-outline" x="1" y="1" width="calc(100% - 2px)" height="calc(100% - 2px)" rx="10" fill="none"
-          stroke={hovered ? '#A855F7' : 'transparent'} strokeWidth="1.5"
-          style={{ filter: hovered ? 'drop-shadow(0 0 4px #A855F7)' : 'none' }} />
-      </svg>
-      <motion.span className="text-xl" animate={easterEgg ? { rotate: [0, 25, -25, 25, -25, 0], scale: [1, 1.5, 1.5, 1.5, 1.5, 1] } : {}} transition={{ duration: 0.9 }}>🦄</motion.span>
+      <motion.span
+        className="text-lg sm:text-xl"
+        animate={easterEgg ? { rotate: [0, 25, -25, 25, -25, 0], scale: [1, 1.5, 1.5, 1.5, 1.5, 1] } : {}}
+        transition={{ duration: 0.9 }}
+      >
+        🦄
+      </motion.span>
+      {/* Only show text label on sm+ */}
+      <span className="hidden sm:block font-black text-sm font-heading gradient-text whitespace-nowrap">
+        NJIRLAH AI
+      </span>
       <AnimatePresence>
         {easterEgg && (
-          <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }} className="absolute left-full ml-2 flex gap-0.5 whitespace-nowrap pointer-events-none">
-            {['🌟', '✨', '💜', '🦄', '💜', '✨', '🌟'].map((e, i) => (
-              <motion.span key={i} animate={{ y: [0, -14, 0], rotate: [0, 20, -20, 0] }} transition={{ duration: 0.55, delay: i * 0.07, repeat: 4 }} className="text-base">{e}</motion.span>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            className="absolute left-full ml-2 flex gap-0.5 whitespace-nowrap pointer-events-none z-50"
+          >
+            {['🌟', '✨', '💜', '🦄'].map((e, i) => (
+              <motion.span key={i} animate={{ y: [0, -14, 0] }} transition={{ duration: 0.55, delay: i * 0.07, repeat: 4 }} className="text-sm">{e}</motion.span>
             ))}
           </motion.div>
         )}
@@ -174,10 +198,15 @@ function Logo() {
   );
 }
 
-export default function Header({ onOpenCommand, onToggleSidebar, sidebarCollapsed }: HeaderProps) {
+export default function Header({ onOpenCommand, onToggleSidebar }: HeaderProps) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
-  const { isStreaming, selectedProvider, activeChatId, getActiveChat, setPinned, setFavorited, deleteChat, chats, setActiveChat } = useChatStore();
+
+  const {
+    isStreaming, selectedProvider, activeChatId, getActiveChat,
+    setPinned, setFavorited, deleteChat, chats, setActiveChat,
+  } = useChatStore();
+
   const activeChat = mounted ? getActiveChat() : null;
   const badgeState = isStreaming ? 'streaming' : 'online';
   const provider = selectedProvider === 'cloudflare' ? '☁️ CF' : '🔗 OR';
@@ -190,44 +219,45 @@ export default function Header({ onOpenCommand, onToggleSidebar, sidebarCollapse
   };
 
   return (
-    <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/10 bg-[#0a0a14]/80 backdrop-blur-xl flex-shrink-0 relative z-10 gap-3">
-      {/* Left: hamburger (mobile) + logo + chat title */}
-      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+    <div className="flex items-center justify-between px-2 sm:px-3 py-2 sm:py-2.5 border-b border-white/10 bg-[#0a0a14]/80 backdrop-blur-xl flex-shrink-0 relative z-10 gap-2">
+
+      {/* ── LEFT: hamburger + logo + chat title ── */}
+      <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0 flex-1">
         {/* Mobile hamburger */}
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={onToggleSidebar}
           aria-label="Buka sidebar"
-          className="p-1.5 rounded-lg text-gray-600 hover:text-white hover:bg-white/10 transition-all flex-shrink-0 md:hidden"
-          suppressHydrationWarning
+          className="md:hidden p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/10 transition-all flex-shrink-0"
         >
           <Menu size={16} />
         </motion.button>
 
         <Logo />
 
-        {/* Divider */}
+        {/* Divider — hidden on mobile */}
         {activeChat && <div className="w-px h-4 bg-white/10 flex-shrink-0 hidden sm:block" />}
 
         {/* Contextual chat title */}
         {activeChat && activeChatId && (
-          <div className="flex items-center gap-1.5 min-w-0">
+          <div className="flex items-center gap-1 min-w-0">
             <EditableTitle chatId={activeChatId} title={activeChat.title} />
           </div>
         )}
       </div>
 
-      {/* Right: pin, fav, menu, model, badge, ⌘K */}
-      <div className="flex items-center gap-1.5 flex-shrink-0">
+      {/* ── RIGHT: actions + model + badge + ⌘K ── */}
+      <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+
+        {/* Pin + Fav — desktop only, in 3-dot on mobile */}
         {activeChat && activeChatId && (
           <>
-            {/* Pin */}
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setPinned(activeChatId, !activeChat.pinned)}
-              className={`p-1.5 rounded-lg transition-all ${
+              className={`hidden sm:flex p-1.5 rounded-lg transition-all ${
                 activeChat.pinned
                   ? 'text-neon-purple bg-neon-purple/15 border border-neon-purple/20'
                   : 'text-gray-700 hover:text-gray-400 hover:bg-white/8'
@@ -237,12 +267,11 @@ export default function Header({ onOpenCommand, onToggleSidebar, sidebarCollapse
               <Pin size={13} className={activeChat.pinned ? 'fill-neon-purple' : ''} />
             </motion.button>
 
-            {/* Favorite */}
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setFavorited(activeChatId, !activeChat.favorited)}
-              className={`p-1.5 rounded-lg transition-all ${
+              className={`hidden sm:flex p-1.5 rounded-lg transition-all ${
                 activeChat.favorited
                   ? 'text-yellow-400 bg-yellow-400/10 border border-yellow-400/20'
                   : 'text-gray-700 hover:text-gray-400 hover:bg-white/8'
@@ -254,17 +283,21 @@ export default function Header({ onOpenCommand, onToggleSidebar, sidebarCollapse
 
             <ChatMenu
               chatId={activeChatId}
-              onRename={() => {/* EditableTitle handles this on click */}}
+              isPinned={activeChat.pinned}
+              isFavorited={activeChat.favorited}
+              onPin={() => setPinned(activeChatId, !activeChat.pinned)}
+              onFav={() => setFavorited(activeChatId, !activeChat.favorited)}
               onDelete={handleDelete}
             />
 
-            <div className="w-px h-4 bg-white/10 mx-0.5" />
+            <div className="w-px h-4 bg-white/10 mx-0.5 hidden sm:block" />
           </>
         )}
 
         <ModelSelector />
         <MultiStateBadge state={badgeState} provider={provider} />
 
+        {/* ⌘K — desktop only */}
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.93 }}
