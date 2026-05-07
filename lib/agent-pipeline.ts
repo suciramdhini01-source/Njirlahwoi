@@ -98,7 +98,6 @@ async function runPlanner(input: PipelineInput, cb: PipelineCallbacks): Promise<
 
   if (input.projectId) {
     try {
-      const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/nj-plan`;
       const byok =
         input.modelSource === "openrouter"
           ? { source: "openrouter" as const, apiKey: input.apiKey, modelId: input.modelId }
@@ -108,12 +107,9 @@ async function runPlanner(input: PipelineInput, cb: PipelineCallbacks): Promise<
               cfAccountId: input.cfAccountId,
               modelId: input.modelId,
             };
-      const res = await fetch(url, {
+      const res = await fetch("/api/nj/plan", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sessionId: input.sessionId,
           projectId: input.projectId,
